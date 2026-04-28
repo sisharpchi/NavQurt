@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using NavQurt.Application;
 using NavQurt.Core.Entities;
 using NavQurt.Core.Enumerations;
 using NavQurt.Infrastructure;
@@ -13,6 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddApplicationOptions(builder.Configuration);
+builder.Services.AddApplicationLayer();
 
 builder.Services.AddInfrastructureLayer(
     builder.Configuration,

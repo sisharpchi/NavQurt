@@ -25,6 +25,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\NavQurt.Application\NavQurt.Application.csproj" />
+    <ProjectReference Include="..\NavQurt.Application.Contracts\NavQurt.Application.Contracts.csproj" />
     <ProjectReference Include="..\NavQurt.Infrastructure\NavQurt.Infrastructure.csproj" />
     <ProjectReference Include="..\NavQurt.Shared\NavQurt.Shared.csproj" />
   </ItemGroup>
