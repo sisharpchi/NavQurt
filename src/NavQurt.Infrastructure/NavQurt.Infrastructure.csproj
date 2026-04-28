@@ -26,4 +26,8 @@
     <ProjectReference Include="..\NavQurt.Core\NavQurt.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\Main\" />
+  </ItemGroup>
+
 </Project>
