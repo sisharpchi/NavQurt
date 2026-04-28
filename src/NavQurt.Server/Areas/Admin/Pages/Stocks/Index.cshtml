@@ -1,0 +1,47 @@
+@page
+@model NavQurt.Server.Areas.Admin.Pages.Stocks.IndexModel
+@{
+    ViewData["Title"] = "Ostatki";
+}
+
+<div class="nq-page-title">
+    <div>
+        <h1>Ostatki</h1>
+        <div class="nq-muted">Ingredient qoldiqlari. Minus qoldiq ham ko‘rinadi.</div>
+    </div>
+</div>
+
+<form method="get" class="nq-card mb-3">
+    <div class="row g-2 align-items-end">
+        <div class="col-md-4">
+            <label asp-for="WarehouseId" class="form-label">Sklad</label>
+            <select asp-for="WarehouseId" class="form-select">
+                <option value="">Barchasi</option>
+                @foreach (var warehouse in Model.Warehouses)
+                {
+                    <option value="@warehouse.Id">@warehouse.Title</option>
+                }
+            </select>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary" type="submit">Ko‘rsatish</button>
+        </div>
+    </div>
+</form>
+
+<div class="nq-card">
+    <table class="table nq-table">
+        <thead><tr><th>Sklad</th><th>Ingredient</th><th>Unit</th><th>Qoldiq</th></tr></thead>
+        <tbody>
+        @foreach (var item in Model.Stocks)
+        {
+            <tr>
+                <td>@item.WarehouseTitle</td>
+                <td>@item.IngredientTitle</td>
+                <td>@item.Unit</td>
+                <td class="@(item.Quantity < 0 ? "text-danger fw-bold" : "")">@item.Quantity.ToString("N3")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

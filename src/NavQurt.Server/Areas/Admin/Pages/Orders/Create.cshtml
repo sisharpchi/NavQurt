@@ -1,0 +1,181 @@
+@page
+@model NavQurt.Server.Areas.Admin.Pages.Orders.CreateModel
+@{
+    ViewData["Title"] = "Order urish";
+}
+
+<div class="nq-page-title">
+    <div>
+        <h1>Order urish</h1>
+        <div class="nq-muted">Tushgan zakazni tez kiriting, to‘lovni belgilang va skladdan ingredient ayriladi.</div>
+    </div>
+    <a class="btn btn-outline-primary" asp-page="./Index">Orderlar</a>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.Message))
+{
+    <div class="alert alert-info">@Model.Message</div>
+}
+
+<form method="post" id="orderForm">
+    <div class="nq-order-shell">
+        <div class="nq-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Productlar</h5>
+                <input class="form-control" style="max-width:260px" id="productSearch" placeholder="Qidirish" />
+            </div>
+            <div class="nq-product-grid" id="productGrid">
+                @foreach (var product in Model.Products)
+                {
+                    <button type="button" class="nq-product-button" data-product-id="@product.Id" data-title="@product.Title" data-price="@product.Price">
+                        <strong>@product.Title</strong>
+                        <div class="nq-muted">@Model.GetCategoryTitle(product.ProductCategoryId)</div>
+                        <div>@product.Price.ToString("N0") so'm</div>
+                    </button>
+                }
+            </div>
+        </div>
+
+        <div class="nq-card">
+            <h5 class="mb-3">Savatcha</h5>
+            <div id="cartRows" class="mb-3"></div>
+
+            @for (var i = 0; i < Model.Input.Items.Count; i++)
+            {
+                <input asp-for="Input.Items[i].ProductId" type="hidden" class="cart-product-id" />
+                <input asp-for="Input.Items[i].Quantity" type="hidden" class="cart-quantity" />
+            }
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="nq-muted">Jami</span>
+                <strong id="cartTotal">0</strong>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Input.PaymentMethodId" class="form-label">Payment method</label>
+                <select asp-for="Input.PaymentMethodId" class="form-select" required>
+                    @foreach (var method in Model.PaymentMethods)
+                    {
+                        <option value="@method.Id">@method.Title</option>
+                    }
+                </select>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Input.WorkerId" class="form-label">Ishchi</label>
+                <select asp-for="Input.WorkerId" class="form-select" required>
+                    @foreach (var worker in Model.Workers)
+                    {
+                        <option value="@worker.Id">@worker.FullName</option>
+                    }
+                </select>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Input.WarehouseId" class="form-label">Sklad</label>
+                <select asp-for="Input.WarehouseId" class="form-select" required>
+                    @foreach (var warehouse in Model.Warehouses)
+                    {
+                        <option value="@warehouse.Id">@warehouse.Title</option>
+                    }
+                </select>
+            </div>
+
+            <hr />
+            <div class="mb-2">
+                <label asp-for="Input.CustomerPhoneNumber" class="form-label">Customer telefon</label>
+                <input asp-for="Input.CustomerPhoneNumber" class="form-control" required />
+            </div>
+            <div class="mb-2">
+                <label asp-for="Input.CustomerFullName" class="form-label">Customer FIO</label>
+                <input asp-for="Input.CustomerFullName" class="form-control" required />
+            </div>
+            <div class="mb-2">
+                <label asp-for="Input.CustomerLocation" class="form-label">Location</label>
+                <input asp-for="Input.CustomerLocation" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label asp-for="Input.Comment" class="form-label">Izoh</label>
+                <textarea asp-for="Input.Comment" class="form-control" rows="2"></textarea>
+            </div>
+
+            <button class="btn btn-primary w-100" type="submit">To‘landi</button>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        const cart = new Map();
+        const maxRows = @Model.Input.Items.Count;
+        const formatter = new Intl.NumberFormat('uz-UZ');
+
+        function renderCart() {
+            const rows = document.getElementById('cartRows');
+            rows.innerHTML = '';
+            let total = 0;
+            let index = 0;
+
+            document.querySelectorAll('.cart-product-id').forEach(x => x.value = 0);
+            document.querySelectorAll('.cart-quantity').forEach(x => x.value = 0);
+
+            for (const [id, item] of cart) {
+                total += item.price * item.quantity;
+                if (index < maxRows) {
+                    document.querySelectorAll('.cart-product-id')[index].value = id;
+                    document.querySelectorAll('.cart-quantity')[index].value = item.quantity;
+                }
+
+                const row = document.createElement('div');
+                row.className = 'd-flex align-items-center justify-content-between border-bottom py-2';
+                row.innerHTML = `
+                    <div>
+                        <strong>${item.title}</strong>
+                        <div class="nq-muted">${formatter.format(item.price)} x ${item.quantity}</div>
+                    </div>
+                    <div class="nq-actions">
+                        <button type="button" class="btn btn-sm btn-light" data-minus="${id}">-</button>
+                        <button type="button" class="btn btn-sm btn-light" data-plus="${id}">+</button>
+                    </div>`;
+                rows.appendChild(row);
+                index++;
+            }
+
+            document.getElementById('cartTotal').textContent = formatter.format(total);
+        }
+
+        document.getElementById('productGrid').addEventListener('click', event => {
+            const button = event.target.closest('.nq-product-button');
+            if (!button) return;
+
+            const id = button.dataset.productId;
+            const current = cart.get(id) || { title: button.dataset.title, price: Number(button.dataset.price), quantity: 0 };
+            current.quantity += 1;
+            cart.set(id, current);
+            renderCart();
+        });
+
+        document.getElementById('cartRows').addEventListener('click', event => {
+            const plus = event.target.dataset.plus;
+            const minus = event.target.dataset.minus;
+            const id = plus || minus;
+            if (!id || !cart.has(id)) return;
+            const item = cart.get(id);
+            item.quantity += plus ? 1 : -1;
+            if (item.quantity <= 0) cart.delete(id);
+            renderCart();
+        });
+
+        document.getElementById('productSearch').addEventListener('input', event => {
+            const text = event.target.value.toLowerCase();
+            document.querySelectorAll('.nq-product-button').forEach(button => {
+                button.style.display = button.dataset.title.toLowerCase().includes(text) ? '' : 'none';
+            });
+        });
+
+        document.getElementById('orderForm').addEventListener('submit', event => {
+            if (cart.size === 0) {
+                event.preventDefault();
+                alert('Kamida bitta product tanlang.');
+            }
+        });
+    </script>
+}

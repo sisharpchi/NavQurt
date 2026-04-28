@@ -54,6 +54,9 @@ public class IdentitySeederService : BackgroundService
             return;
         }
 
+        role.CreatedAt = EnsureUtc(role.CreatedAt);
+        role.LastModifiedAt = role.LastModifiedAt.HasValue ? EnsureUtc(role.LastModifiedAt.Value) : null;
+
         var existingClaims = await roleManager.GetClaimsAsync(role);
         foreach (var claim in ClaimsStore.AllClaims.Select(x => x.Claim))
         {
@@ -64,6 +67,16 @@ public class IdentitySeederService : BackgroundService
 
             await roleManager.AddClaimAsync(role, claim);
         }
+    }
+
+    private static DateTime EnsureUtc(DateTime value)
+    {
+        return value.Kind switch
+        {
+            DateTimeKind.Utc => value,
+            DateTimeKind.Local => value.ToUniversalTime(),
+            _ => DateTime.SpecifyKind(value, DateTimeKind.Utc)
+        };
     }
 
     private async Task EnsureConfiguredAdminAsync(UserManager<User> userManager, CancellationToken ct)

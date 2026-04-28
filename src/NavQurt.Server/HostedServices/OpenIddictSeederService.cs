@@ -1,5 +1,7 @@
 using OpenIddict.Abstractions;
 using NavQurt.Server.Options;
+using NavQurt.Core.Entities;
+using System.Text.Json;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace NavQurt.Server.HostedServices;
@@ -52,15 +54,13 @@ public class OpenIddictSeederService : BackgroundService
             Permissions.Prefixes.Scope + Scopes.OfflineAccess
         };
 
-        var descriptor = new OpenIddictApplicationDescriptor
+        var descriptor = new OpenIdApplication
         {
             ClientId = clientId,
-            DisplayName = _seedOptions.WebClientDisplayName
+            ClientType = ClientTypes.Public,
+            DisplayName = _seedOptions.WebClientDisplayName,
+            Permissions = JsonSerializer.Serialize(permissions)
         };
-        foreach (var permission in permissions)
-        {
-            descriptor.Permissions.Add(permission);
-        }
 
         await applicationManager.CreateAsync(descriptor, ct);
         _logger.LogInformation("Created OpenIddict public client: {ClientId}", clientId);
@@ -82,15 +82,13 @@ public class OpenIddictSeederService : BackgroundService
             Permissions.Prefixes.Scope + "write"
         };
 
-        var descriptor = new OpenIddictApplicationDescriptor
+        var descriptor = new OpenIdApplication
         {
             ClientId = clientId,
-            DisplayName = _seedOptions.ServiceClientDisplayName
+            ClientType = ClientTypes.Confidential,
+            DisplayName = _seedOptions.ServiceClientDisplayName,
+            Permissions = JsonSerializer.Serialize(permissions)
         };
-        foreach (var permission in permissions)
-        {
-            descriptor.Permissions.Add(permission);
-        }
 
         await applicationManager.CreateAsync(descriptor, _seedOptions.ServiceClientSecret, ct);
         _logger.LogInformation("Created OpenIddict confidential client: {ClientId}", clientId);

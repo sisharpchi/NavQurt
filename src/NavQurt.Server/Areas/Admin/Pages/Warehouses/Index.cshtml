@@ -1,0 +1,57 @@
+@page
+@model NavQurt.Server.Areas.Admin.Pages.Warehouses.IndexModel
+@{
+    ViewData["Title"] = "Skladlar";
+}
+
+<div class="nq-page-title">
+    <div>
+        <h1>Skladlar</h1>
+        <div class="nq-muted">Default Main sklad va qo‘shimcha skladlar.</div>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.Message))
+{
+    <div class="alert alert-info">@Model.Message</div>
+}
+
+<div class="row g-3">
+    <div class="col-lg-4">
+        <div class="nq-card">
+            <form method="post">
+                <input asp-for="Input.Id" type="hidden" />
+                <div class="mb-3">
+                    <label asp-for="Input.Title" class="form-label">Nomi</label>
+                    <input asp-for="Input.Title" class="form-control" required />
+                </div>
+                <div class="form-check mb-3">
+                    <input asp-for="Input.IsActive" class="form-check-input" />
+                    <label asp-for="Input.IsActive" class="form-check-label">Active</label>
+                </div>
+                <div class="nq-actions">
+                    <button class="btn btn-primary" type="submit">Saqlash</button>
+                    <a class="btn btn-light" asp-page="./Index">Tozalash</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="nq-card">
+            <table class="table nq-table">
+                <thead><tr><th>Nomi</th><th>Asosiy</th><th>Status</th><th></th></tr></thead>
+                <tbody>
+                @foreach (var item in Model.Warehouses)
+                {
+                    <tr>
+                        <td>@item.Title</td>
+                        <td>@(item.IsMain ? "Ha" : "-")</td>
+                        <td>@(item.IsActive ? "Active" : "Off")</td>
+                        <td class="text-end"><a class="btn btn-sm btn-outline-primary" asp-route-editId="@item.Id">Edit</a></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

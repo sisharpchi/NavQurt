@@ -1,0 +1,79 @@
+@page
+@model NavQurt.Server.Areas.Admin.Pages.Incomes.IndexModel
+@{
+    ViewData["Title"] = "Prixod";
+}
+
+<div class="nq-page-title">
+    <div>
+        <h1>Prixod</h1>
+        <div class="nq-muted">Ingredientlarni skladga kirim qilish.</div>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.Message))
+{
+    <div class="alert alert-info">@Model.Message</div>
+}
+
+<div class="row g-3">
+    <div class="col-xl-5">
+        <div class="nq-card">
+            <form method="post">
+                <div class="mb-3">
+                    <label asp-for="Input.WarehouseId" class="form-label">Sklad</label>
+                    <select asp-for="Input.WarehouseId" class="form-select" required>
+                        @foreach (var warehouse in Model.Warehouses)
+                        {
+                            <option value="@warehouse.Id">@warehouse.Title</option>
+                        }
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Input.Comment" class="form-label">Izoh</label>
+                    <input asp-for="Input.Comment" class="form-control" />
+                </div>
+                <h6>Ingredientlar</h6>
+                @for (var i = 0; i < Model.Input.Items.Count; i++)
+                {
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <select asp-for="Input.Items[i].IngredientId" class="form-select">
+                                <option value="0">Ingredient</option>
+                                @foreach (var ingredient in Model.Ingredients)
+                                {
+                                    <option value="@ingredient.Id">@ingredient.Title (@ingredient.Unit)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-3">
+                            <input asp-for="Input.Items[i].Quantity" class="form-control" type="number" step="0.001" placeholder="Miqdor" />
+                        </div>
+                        <div class="col-3">
+                            <input asp-for="Input.Items[i].Price" class="form-control" type="number" step="0.01" placeholder="Narx" />
+                        </div>
+                    </div>
+                }
+                <button class="btn btn-primary mt-2" type="submit">Prixod qilish</button>
+            </form>
+        </div>
+    </div>
+    <div class="col-xl-7">
+        <div class="nq-card">
+            <table class="table nq-table">
+                <thead><tr><th>Sana</th><th>Sklad</th><th>Summa</th><th>Izoh</th></tr></thead>
+                <tbody>
+                @foreach (var item in Model.Incomes)
+                {
+                    <tr>
+                        <td>@item.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                        <td>@Model.GetWarehouseTitle(item.WarehouseId)</td>
+                        <td>@item.TotalAmount.ToString("N0")</td>
+                        <td>@item.Comment</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

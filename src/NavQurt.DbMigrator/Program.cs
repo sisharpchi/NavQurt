@@ -3,10 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NavQurt.Core.Entities;
 using NavQurt.DbMigrator;
-using NavQurt.Infrastructure;
 using NavQurt.Infrastructure.Data;
-using NavQurt.Server.Extensions;
-using NavQurt.Server.HostedServices;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -20,13 +17,19 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((ctx, services) =>
     {
-        services.AddApplicationOptions(ctx.Configuration);
-        services.AddInfrastructureLayer(
-            ctx.Configuration,
-            optionsAction: options =>
+        var connectionString = ctx.Configuration.GetSection("ConnectionStrings")["MainDatabase"]
+            ?? "Server=127.0.0.1;port=5432;Database=navqurt_db;Uid=postgres;Pwd=1";
+        services.AddDbContext<MainDbContext>(options =>
+        {
+            options.UseNpgsql(connectionString, npgsqlOptions =>
             {
-                options.UseOpenIddict<OpenIdApplication, OpenIdAuthorization, OpenIdScope, OpenIdToken, long>();
+                npgsqlOptions.EnableRetryOnFailure(
+                    maxRetryCount: 3,
+                    maxRetryDelay: TimeSpan.FromSeconds(5),
+                    errorCodesToAdd: ["08P01", "08006", "08001", "08004"]);
             });
+            options.UseOpenIddict<OpenIdApplication, OpenIdAuthorization, OpenIdScope, OpenIdToken, long>();
+        });
 
         services.AddOpenIddict()
             .AddCore(options =>
@@ -37,8 +40,6 @@ var host = Host.CreateDefaultBuilder(args)
             });
 
         services.AddHostedService<MainDatabaseMigratorService>();
-        services.AddHostedService<IdentitySeederService>();
-        services.AddHostedService<OpenIddictSeederService>();
     })
     .UseSerilog()
     .Build();

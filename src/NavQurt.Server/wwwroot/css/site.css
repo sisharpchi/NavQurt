@@ -81,3 +81,109 @@ body {
   white-space: nowrap;
   line-height: 60px;
 }
+.nq-page-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.nq-page-title h1 {
+    font-size: 1.35rem;
+    margin: 0;
+    font-weight: 700;
+}
+
+.nq-muted {
+    color: #64748b;
+    font-size: .875rem;
+}
+
+.nq-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .04);
+}
+
+.nq-stat {
+    min-height: 96px;
+}
+
+.nq-stat strong {
+    display: block;
+    font-size: 1.7rem;
+    line-height: 1.2;
+}
+
+.nq-table {
+    margin-bottom: 0;
+}
+
+.nq-table th {
+    color: #64748b;
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    white-space: nowrap;
+}
+
+.nq-table td {
+    vertical-align: middle;
+}
+
+.nq-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .75rem;
+}
+
+.nq-form-grid .span-2 {
+    grid-column: span 2;
+}
+
+.nq-actions {
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+}
+
+.nq-order-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(320px, .7fr);
+    gap: 1rem;
+}
+
+.nq-product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: .75rem;
+}
+
+.nq-product-button {
+    width: 100%;
+    min-height: 94px;
+    text-align: left;
+    border: 1px solid #dbe2ea;
+    border-radius: 8px;
+    background: #fff;
+    padding: .75rem;
+}
+
+.nq-product-button:hover {
+    border-color: #24695c;
+    box-shadow: 0 8px 24px rgba(36, 105, 92, .12);
+}
+
+@media (max-width: 992px) {
+    .nq-order-shell,
+    .nq-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .nq-form-grid .span-2 {
+        grid-column: span 1;
+    }
+}

@@ -1,0 +1,32 @@
+@page
+@model NavQurt.Server.Areas.Admin.Pages.Orders.IndexModel
+@{
+    ViewData["Title"] = "Orderlar";
+}
+
+<div class="nq-page-title">
+    <div>
+        <h1>Orderlar</h1>
+        <div class="nq-muted">To‘langan orderlar ro‘yxati.</div>
+    </div>
+    <a class="btn btn-primary" asp-page="./Create">Order urish</a>
+</div>
+
+<div class="nq-card">
+    <table class="table nq-table">
+        <thead><tr><th>Raqam</th><th>Customer</th><th>Ishchi</th><th>Productlar</th><th>To‘lov</th><th>Sana</th></tr></thead>
+        <tbody>
+        @foreach (var item in Model.Orders)
+        {
+            <tr>
+                <td>@item.OrderNumber</td>
+                <td>@item.CustomerFullName<br /><span class="nq-muted">@item.CustomerPhoneNumber · @item.CustomerLocation</span></td>
+                <td>@Model.GetWorkerName(item.WorkerId)</td>
+                <td>@string.Join(", ", item.Items.Select(x => $"{x.ProductTitle} x{x.Quantity:N2}"))</td>
+                <td>@item.TotalAmount.ToString("N0")<br /><span class="nq-muted">@string.Join(", ", item.Payments.Select(x => x.PaymentMethodTitle))</span></td>
+                <td>@item.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
