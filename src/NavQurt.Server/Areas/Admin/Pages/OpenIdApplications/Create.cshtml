@@ -1,0 +1,45 @@
+@page
+@model NavQurt.Server.Areas.Admin.Pages.OpenIdApplications.CreateModel
+@{
+    ViewData["Title"] = "Create OpenId client";
+}
+
+<h1 class="h3">Create OpenId client</h1>
+
+@if (Model.CreatedSecret != null)
+{
+    <div class="alert alert-success">
+        Client created. Secret: <code>@Model.CreatedSecret</code>
+    </div>
+}
+
+<form method="post" class="col-lg-7">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="mb-3">
+        <label asp-for="Input.ClientId" class="form-label"></label>
+        <input asp-for="Input.ClientId" class="form-control" />
+        <span asp-validation-for="Input.ClientId" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Input.DisplayName" class="form-label"></label>
+        <input asp-for="Input.DisplayName" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label asp-for="Input.ClientSecret" class="form-label"></label>
+        <input asp-for="Input.ClientSecret" class="form-control" />
+    </div>
+    <div class="form-check mb-3">
+        <input asp-for="Input.AllowPasswordFlow" class="form-check-input" />
+        <label asp-for="Input.AllowPasswordFlow" class="form-check-label"></label>
+    </div>
+    <div class="form-check mb-3">
+        <input asp-for="Input.AllowClientCredentialsFlow" class="form-check-input" />
+        <label asp-for="Input.AllowClientCredentialsFlow" class="form-check-label"></label>
+    </div>
+    <button type="submit" class="btn btn-primary">Create</button>
+    <a asp-page="./Index" class="btn btn-link">Back</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

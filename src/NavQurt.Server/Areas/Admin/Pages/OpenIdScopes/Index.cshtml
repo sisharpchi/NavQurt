@@ -1,0 +1,25 @@
+@page
+@model NavQurt.Server.Areas.Admin.Pages.OpenIdScopes.IndexModel
+@{
+    ViewData["Title"] = "OpenId scopes";
+}
+
+<h1 class="h3">OpenId scopes</h1>
+
+<table class="table table-sm">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Display name</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.Scopes)
+    {
+        <tr>
+            <td>@item.Name</td>
+            <td>@item.DisplayName</td>
+        </tr>
+    }
+    </tbody>
+</table>

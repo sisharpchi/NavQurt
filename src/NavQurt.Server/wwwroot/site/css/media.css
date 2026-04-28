@@ -1,0 +1,21 @@
+﻿@media only screen and (max-width: 768px) {
+    #current-user-div {
+        display: none;
+    }
+}
+
+@media only screen and (max-width: 360px) {
+    #header-logout-container {
+        display: none;
+    }
+}
+
+@media only screen and (min-width: 360px) {
+    #navigitaion-logout-container {
+        display: none;
+    }
+}
+
+
+
+

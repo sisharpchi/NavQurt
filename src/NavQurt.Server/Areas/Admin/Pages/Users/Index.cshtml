@@ -1,0 +1,41 @@
+@page
+@model NavQurt.Server.Areas.Admin.Pages.Users.IndexModel
+@{
+    ViewData["Title"] = "Users";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Users</h1>
+    <a class="btn btn-primary" asp-page="./Create">Create</a>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-sm-4">
+        <input asp-for="Search" class="form-control" placeholder="Username or phone" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-outline-primary">Search</button>
+    </div>
+</form>
+
+<table class="table table-sm align-middle">
+    <thead>
+        <tr>
+            <th>User name</th>
+            <th>Phone</th>
+            <th>Name</th>
+            <th>Roles</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var user in Model.Users)
+    {
+        <tr>
+            <td>@user.UserName</td>
+            <td>@user.PhoneNumber</td>
+            <td>@user.FullName</td>
+            <td>@string.Join(", ", user.Roles)</td>
+        </tr>
+    }
+    </tbody>
+</table>

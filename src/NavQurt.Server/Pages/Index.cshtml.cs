@@ -1,0 +1,10 @@
+using Microsoft.AspNetCore.Mvc.RazorPages;
+
+namespace NavQurt.Server.Pages;
+
+public class IndexModel : PageModel
+{
+    public void OnGet()
+    {
+    }
+}
