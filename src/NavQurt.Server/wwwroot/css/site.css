@@ -71,7 +71,7 @@ html {
 }
 
 body {
-  margin-bottom: 60px;
+  margin-bottom: 0;
 }
 .footer {
   position: absolute;
@@ -80,6 +80,431 @@ body {
   overflow: scroll;
   white-space: nowrap;
   line-height: 60px;
+}
+
+.nq-app {
+    background: #f5f7fb;
+    color: #1f2937;
+}
+
+.nq-app .page-wrapper.compact-wrapper .page-main-header {
+    height: 72px;
+    min-height: 72px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .06);
+}
+
+.nq-header .main-header-right {
+    height: 72px;
+    align-items: center;
+}
+
+.nq-app .page-main-header .main-header-right .main-header-left.nq-header-brand {
+    width: 280px;
+    min-width: 280px;
+    height: 72px;
+    padding: 0 24px;
+    border-right: 1px solid #e6edef;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.nq-app .page-main-header .main-header-right .main-header-left .logo-wrapper {
+    display: block;
+    padding: 0;
+}
+
+.nq-app .page-main-header .main-header-right .main-header-left .toggle-sidebar {
+    margin-left: 12px;
+}
+
+.nq-app .page-main-header .main-header-right .nav-right {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    min-height: 72px;
+}
+
+.nq-brand-link,
+.nq-sidebar-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: .65rem;
+    color: #1f2937;
+    font-weight: 700;
+}
+
+.nq-brand-link:hover,
+.nq-sidebar-logo:hover {
+    color: #24695c;
+    text-decoration: none;
+}
+
+.nq-brand-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 8px;
+    background: #24695c !important;
+    color: #fff !important;
+    font-size: .8rem;
+    font-weight: 800;
+    letter-spacing: 0;
+}
+
+.nq-brand-text {
+    font-size: 1.05rem;
+}
+
+.nq-header-menu {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .35rem;
+    flex-wrap: wrap;
+    margin: 0;
+    height: auto !important;
+    padding: 0 30px !important;
+    position: static !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    background: transparent !important;
+}
+
+.nq-app .page-main-header .main-header-right .nav-right > ul.nq-header-menu {
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    width: auto !important;
+    transform: none !important;
+    z-index: auto !important;
+}
+
+.nq-header-menu > li {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.nq-header-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    min-height: 38px;
+    padding: .45rem .7rem;
+    border-radius: 8px;
+    color: #334155;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.nq-header-link svg,
+.nq-logout-btn svg,
+.nq-admin-badge svg {
+    width: 16px;
+    height: 16px;
+}
+
+.nq-header-link:hover {
+    background: #eef7f5;
+    color: #24695c;
+    text-decoration: none;
+}
+
+.nq-admin-link,
+.nq-admin-badge {
+    background: #fff7e6;
+    color: #9a6700;
+}
+
+.nq-admin-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    min-height: 38px;
+    padding: .45rem .7rem;
+    border-radius: 8px;
+    font-weight: 700;
+}
+
+.nq-user-area {
+    display: inline-flex;
+    align-items: center;
+    gap: .65rem;
+    padding-left: .5rem;
+}
+
+.nq-user-name {
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #475569;
+    font-weight: 700;
+}
+
+.nq-logout-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    min-height: 38px;
+    border-radius: 8px;
+    font-weight: 700;
+}
+
+.nq-app .page-body-wrapper {
+    background: #f5f7fb;
+}
+
+.nq-app .page-wrapper.compact-wrapper .page-body-wrapper .page-body.nq-page-body {
+    margin-top: 72px;
+    margin-left: 280px;
+    padding: 24px 28px;
+    min-height: calc(100vh - 72px);
+    background: #f5f7fb;
+}
+
+.nq-app .page-wrapper.compact-wrapper .page-body-wrapper .page-body.nq-page-body > .container-fluid {
+    max-width: 100%;
+    padding: 0;
+}
+
+.nq-sidebar {
+    position: fixed !important;
+    top: 72px !important;
+    left: 0;
+    z-index: 8;
+    width: 280px !important;
+    height: calc(100vh - 72px) !important;
+    overflow: hidden;
+    background: #fff !important;
+    border-right: 1px solid #e6edef !important;
+    box-shadow: 8px 0 24px rgba(15, 23, 42, .03);
+}
+
+.nq-app .page-wrapper.compact-wrapper .page-body-wrapper header.main-nav.nq-sidebar {
+    top: 72px !important;
+    width: 280px !important;
+    height: calc(100vh - 72px) !important;
+    background: #fff !important;
+}
+
+.nq-sidebar .nq-sidebar-head {
+    display: flex;
+    align-items: center;
+    min-height: 70px;
+    padding: 0 22px;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.nq-sidebar .main-navbar,
+.nq-sidebar #mainnav {
+    width: 100%;
+}
+
+.nq-sidebar .nav-menu,
+.nq-sidebar .sidebar-links {
+    display: block;
+    left: 0 !important;
+    height: calc(100vh - 142px) !important;
+    margin: 0;
+    padding: 10px 0 22px !important;
+    overflow-x: hidden;
+    overflow-y: auto !important;
+    color: rgba(0, 0, 0, 0);
+    list-style: none;
+}
+
+.nq-sidebar .nav-menu > li.dropdown,
+.nq-sidebar .sidebar-list {
+    display: block;
+    width: 100%;
+    padding: 0 12px !important;
+    margin: 2px 0;
+}
+
+.nq-sidebar .nq-side-link,
+.nq-sidebar .sidebar-link {
+    display: flex !important;
+    align-items: center;
+    gap: 10px;
+    min-height: 42px;
+    padding: 10px 12px !important;
+    border-radius: 8px;
+    color: #334155;
+    font-weight: 650;
+    line-height: 1.15;
+    text-decoration: none;
+}
+
+.nq-sidebar .nq-side-link svg,
+.nq-sidebar .sidebar-link svg {
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px;
+    margin: 0 !important;
+    color: #24695c;
+    stroke-width: 2.2px;
+}
+
+.nq-sidebar .nq-side-link span,
+.nq-sidebar .sidebar-link span {
+    display: inline-block;
+    color: inherit;
+    font-size: .92rem;
+    font-weight: 650;
+}
+
+.nq-sidebar .nq-side-link.active,
+.nq-sidebar .nq-side-link:hover,
+.nq-sidebar .sidebar-link:hover {
+    background: #eef7f5;
+    color: #24695c;
+    text-decoration: none;
+}
+
+.nq-sidebar .sidebar-main-title {
+    display: block !important;
+    width: 100%;
+    padding: 14px 12px 6px;
+    margin: 0;
+}
+
+.nq-sidebar .sidebar-main-title h6 {
+    color: #94a3b8;
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+.nq-page-body {
+    background: #f5f7fb;
+    min-height: calc(100vh - 80px);
+}
+
+.nq-admin-app .nq-brand-mark {
+    background: #1f2937;
+}
+
+.nq-admin-app .nq-side-link:hover,
+.nq-admin-app .nq-side-link.active,
+.nq-admin-app .sidebar-link:hover {
+    background: #eef2ff;
+    color: #1f2937;
+}
+
+@media (max-width: 1199px) {
+    .nq-app .page-main-header .main-header-right .main-header-left.nq-header-brand {
+        width: 240px;
+        min-width: 240px;
+    }
+
+    .nq-header-link span {
+        display: none;
+    }
+
+    .nq-sidebar {
+        width: 240px !important;
+    }
+
+    .nq-app .page-wrapper.compact-wrapper .page-body-wrapper header.main-nav.nq-sidebar {
+        width: 240px !important;
+    }
+
+    .nq-app .page-wrapper.compact-wrapper .page-body-wrapper .page-body.nq-page-body {
+        margin-left: 240px;
+    }
+}
+
+@media (max-width: 768px) {
+    .nq-app .page-wrapper.compact-wrapper .page-main-header,
+    .nq-header .main-header-right {
+        height: 64px;
+        min-height: 64px;
+    }
+
+    .nq-app .page-main-header .main-header-right .main-header-left.nq-header-brand {
+        width: 180px;
+        min-width: 180px;
+        height: 64px;
+        padding: 0 14px;
+    }
+
+    .nq-brand-text {
+        display: none;
+    }
+
+    .nq-header-menu {
+        justify-content: flex-start;
+        gap: .25rem;
+        padding: 0 12px !important;
+    }
+
+    .nq-user-name {
+        display: none;
+    }
+
+    .nq-header-link,
+    .nq-logout-btn,
+    .nq-admin-badge {
+        min-height: 34px;
+        padding: .4rem .55rem;
+    }
+
+    .nq-sidebar {
+        top: 64px !important;
+        width: 78px !important;
+        height: calc(100vh - 64px) !important;
+    }
+
+    .nq-app .page-wrapper.compact-wrapper .page-body-wrapper header.main-nav.nq-sidebar {
+        top: 64px !important;
+        width: 78px !important;
+        height: calc(100vh - 64px) !important;
+    }
+
+    .nq-sidebar .nq-sidebar-head {
+        justify-content: center;
+        min-height: 62px;
+        padding: 0 8px;
+    }
+
+    .nq-sidebar .nq-sidebar-logo span:not(.nq-brand-mark) {
+        display: none;
+    }
+
+    .nq-sidebar .nav-menu {
+        height: calc(100vh - 126px) !important;
+        padding: 8px 0 16px !important;
+    }
+
+    .nq-sidebar .sidebar-main-title {
+        display: none !important;
+    }
+
+    .nq-sidebar .nav-menu > li.dropdown {
+        padding: 0 8px !important;
+    }
+
+    .nq-sidebar .nq-side-link,
+    .nq-sidebar .sidebar-link {
+        justify-content: center;
+        padding: 10px !important;
+    }
+
+    .nq-sidebar .nq-side-link span,
+    .nq-sidebar .sidebar-link span {
+        display: none;
+    }
+
+    .nq-app .page-wrapper.compact-wrapper .page-body-wrapper .page-body.nq-page-body {
+        margin-top: 64px;
+        margin-left: 78px !important;
+        padding: 16px;
+        min-height: calc(100vh - 64px);
+    }
 }
 .nq-page-title {
     display: flex;

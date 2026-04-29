@@ -1,12 +1,27 @@
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<User> UserManager
+@{
+    var currentUser = User.Identity?.IsAuthenticated == true
+        ? await UserManager.GetUserAsync(User)
+        : null;
+    var displayName = string.Join(" ", new[] { currentUser?.FirstName, currentUser?.LastName }.Where(x => !string.IsNullOrWhiteSpace(x)));
+    if (string.IsNullOrWhiteSpace(displayName))
+    {
+        displayName = User.Identity?.Name ?? "Admin";
+    }
+}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uz">
 <head>
     <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Admin</title>
+    <link rel="icon" href="~/favicon.ico" type="image/x-icon" />
     <link rel="stylesheet" href="~/css/fontawesome.css" />
     <link rel="stylesheet" href="~/css/icofont.css" />
     <link rel="stylesheet" href="~/css/themify.css" />
+    <link rel="stylesheet" href="~/css/flag-icon.css" />
     <link rel="stylesheet" href="~/css/feather-icon.css" />
     <link rel="stylesheet" href="~/css/animate.css" />
     <link rel="stylesheet" href="~/css/bootstrap.css" />
@@ -16,30 +31,65 @@
     <link rel="stylesheet" href="~/css/site.css" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
-<body>
+<body class="nq-app nq-admin-app">
     <div class="page-wrapper compact-wrapper" id="pageWrapper">
-        <div class="page-main-header">
+        <div class="page-main-header nq-header nq-admin-header">
             <div class="main-header-right row m-0">
-                <div class="main-header-left">
-                    <div class="logo-wrapper"><a asp-area="Admin" asp-page="/Users/Index"><h4 class="mb-0">NavQurt Admin</h4></a></div>
+                <div class="main-header-left nq-header-brand">
+                    <div class="logo-wrapper">
+                        <a asp-area="Admin" asp-page="/Users/Index" class="nq-brand-link">
+                            <span class="nq-brand-mark">AD</span>
+                            <span class="nq-brand-text">NavQurt Admin</span>
+                        </a>
+                    </div>
                     <div class="toggle-sidebar"><i data-feather="align-center" id="sidebar-toggle"></i></div>
                 </div>
                 <div class="nav-right col pull-right right-menu p-0">
-                    <ul class="nav-menus">
-                        <li><a asp-page="/Index" asp-area="">App</a></li>
-                        <li class="onhover-dropdown p-0"><form asp-area="Identity" asp-page="/Account/Logout" method="post"><button type="submit" class="btn btn-primary-light"><i data-feather="log-out"></i> Logout</button></form></li>
+                    <ul class="nav-menus nq-header-menu">
+                        <li><a class="nq-header-link" asp-page="/Index" asp-area=""><i data-feather="arrow-left-circle"></i><span>App</span></a></li>
+                        <li><span class="nq-admin-badge"><i data-feather="shield"></i> Admin rejim</span></li>
+                        <li class="nq-user-area">
+                            <span class="nq-user-name">@displayName</span>
+                            <form asp-area="Identity" asp-page="/Account/Logout" method="post">
+                                <button type="submit" class="btn btn-primary-light nq-logout-btn"><i data-feather="log-out"></i><span>Chiqish</span></button>
+                            </form>
+                        </li>
                     </ul>
                 </div>
             </div>
         </div>
         <div class="page-body-wrapper">
-            <div class="sidebar-wrapper"><div><div class="logo-wrapper"><a asp-area="Admin" asp-page="/Users/Index"><h4 class="mb-0">Admin</h4></a></div><nav class="sidebar-main"><ul class="sidebar-links" id="simple-bar">
-                <li class="sidebar-list"><a class="sidebar-link sidebar-title link-nav" asp-area="Admin" asp-page="/Users/Index"><i data-feather="users"></i><span>Users</span></a></li>
-                <li class="sidebar-list"><a class="sidebar-link sidebar-title link-nav" asp-area="Admin" asp-page="/Roles/Index"><i data-feather="shield"></i><span>Roles</span></a></li>
-                <li class="sidebar-list"><a class="sidebar-link sidebar-title link-nav" asp-area="Admin" asp-page="/OpenIdApplications/Index"><i data-feather="key"></i><span>OpenId apps</span></a></li>
-                <li class="sidebar-list"><a class="sidebar-link sidebar-title link-nav" asp-area="Admin" asp-page="/OpenIdScopes/Index"><i data-feather="lock"></i><span>OpenId scopes</span></a></li>
-            </ul></nav></div></div>
-            <div class="page-body"><div class="container-fluid py-4">@RenderBody()</div></div>
+            <header class="main-nav nq-sidebar">
+                <div class="sidebar nq-sidebar-head">
+                    <a asp-area="Admin" asp-page="/Users/Index" class="nq-sidebar-logo">
+                        <span class="nq-brand-mark">AD</span>
+                        <span>Admin</span>
+                    </a>
+                </div>
+                <nav>
+                    <div class="main-navbar">
+                        <div class="left-arrow disabled" id="left-arrow"><i data-feather="chevron-left"></i></div>
+                        <div id="mainnav">
+                            <ul class="nav-menu custom-scrollbar nq-sidebar-menu">
+                                <li class="back-btn">
+                                    <div class="mobile-back text-end"><span>Back</span><i class="fa fa-angle-right ps-2" aria-hidden="true"></i></div>
+                                </li>
+                                <li class="sidebar-main-title"><div><h6>Admin</h6></div></li>
+                                <li class="dropdown"><a class="nav-link menu-title link-nav nq-side-link" asp-area="Admin" asp-page="/Users/Index"><i data-feather="users"></i><span>Users</span></a></li>
+                                <li class="dropdown"><a class="nav-link menu-title link-nav nq-side-link" asp-area="Admin" asp-page="/Roles/Index"><i data-feather="shield"></i><span>Roles</span></a></li>
+
+                                <li class="sidebar-main-title"><div><h6>OpenIddict</h6></div></li>
+                                <li class="dropdown"><a class="nav-link menu-title link-nav nq-side-link" asp-area="Admin" asp-page="/OpenIdApplications/Index"><i data-feather="unlock"></i><span>Applications</span></a></li>
+                                <li class="dropdown"><a class="nav-link menu-title link-nav nq-side-link" asp-area="Admin" asp-page="/OpenIdScopes/Index"><i data-feather="lock"></i><span>Scopes</span></a></li>
+                            </ul>
+                        </div>
+                        <div class="right-arrow" id="right-arrow"><i data-feather="chevron-right"></i></div>
+                    </div>
+                </nav>
+            </header>
+            <div class="page-body nq-page-body">
+                <div class="container-fluid py-4">@RenderBody()</div>
+            </div>
         </div>
     </div>
     <script src="~/js/jquery-3.5.1.min.js"></script>

@@ -41,6 +41,20 @@ builder.Services.ConfigureApplicationCookie(options =>
 
         return Task.CompletedTask;
     };
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        if (context.Request.Path.StartsWithSegments("/Admin", StringComparison.OrdinalIgnoreCase))
+        {
+            var returnUrl = Uri.EscapeDataString(context.Request.PathBase + context.Request.Path + context.Request.QueryString);
+            context.Response.Redirect($"/login2?ReturnUrl={returnUrl}");
+
+            return Task.CompletedTask;
+        }
+
+        context.Response.Redirect(context.RedirectUri);
+
+        return Task.CompletedTask;
+    };
 });
 
 builder.Services.AddControllers();
@@ -54,7 +68,9 @@ builder.Services.AddRazorPages(options =>
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy(Permissions.SuperAdmin, policy => policy.RequireRole(AppRoles.SuperAdmin));
+    options.AddPolicy(Permissions.SuperAdmin, policy => policy
+        .RequireRole(AppRoles.SuperAdmin)
+        .RequireClaim(CustomClaimTypes.LoginMode, CustomClaimValues.AdminLogin));
 
     foreach (var claim in ClaimsStore.AllClaims)
     {
