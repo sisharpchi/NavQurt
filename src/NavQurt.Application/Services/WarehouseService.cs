@@ -20,6 +20,12 @@ internal sealed class WarehouseService(IMainRepository repository) : BusinessSer
         return ResponseResult<IReadOnlyCollection<WarehouseDto>>.CreateSuccess(items);
     }
 
+    public async Task<ResponseResult<WarehouseDto>> GetAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var entity = await repository.GetAsync<Warehouse>(x => x.Id == id && !x.IsDeleted);
+        return entity == null ? NotFound<WarehouseDto>("Warehouse") : ResponseResult<WarehouseDto>.CreateSuccess(entity.ToDto());
+    }
+
     public async Task<ResponseResult<WarehouseDto>> CreateAsync(WarehouseRequest request, CancellationToken cancellationToken = default)
     {
         if (!HasText(request.Title))
@@ -47,5 +53,18 @@ internal sealed class WarehouseService(IMainRepository repository) : BusinessSer
 
         await repository.UnitOfWork.CommitAsync(cancellationToken);
         return ResponseResult<WarehouseDto>.CreateSuccess(entity.ToDto());
+    }
+
+    public async Task<ResponseResult> DeleteAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var entity = await repository.GetAsync<Warehouse>(x => x.Id == id && !x.IsDeleted);
+        if (entity == null)
+        {
+            return NotFound("Warehouse");
+        }
+
+        entity.IsDeleted = true;
+        await repository.UnitOfWork.CommitAsync(cancellationToken);
+        return ResponseResult.CreateSuccess();
     }
 }

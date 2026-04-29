@@ -1,0 +1,13 @@
+@page
+@model NavQurt.Server.Pages.Incomes.IndexModel
+@{
+    ViewData["Title"] = "Prixod";
+}
+<div class="nq-page-title"><div><h1>Prixod</h1><div class="nq-muted">Ingredientlarni skladga kirim qilish.</div></div><a class="btn btn-primary" asp-page="./Create">Yangi prixod</a></div>
+@if (!string.IsNullOrWhiteSpace(Model.Message)) { <div class="alert alert-info">@Model.Message</div> }
+<div class="nq-card"><table class="table nq-table"><thead><tr><th>Sana</th><th>Sklad</th><th>Summa</th><th>Izoh</th><th></th></tr></thead><tbody>
+@foreach (var item in Model.Incomes)
+{
+<tr><td>@item.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td><td>@Model.GetWarehouseTitle(item.WarehouseId)</td><td>@item.TotalAmount.ToString("N0")</td><td>@item.Comment</td><td class="text-end"><a class="btn btn-sm btn-outline-primary" asp-page="./Detail" asp-route-id="@item.Id">Detail</a></td></tr>
+}
+</tbody></table></div>

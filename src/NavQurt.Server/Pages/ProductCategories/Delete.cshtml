@@ -1,0 +1,18 @@
+@page "{id:int}"
+@model NavQurt.Server.Pages.ProductCategories.DeleteModel
+@{
+    ViewData["Title"] = "Product category delete";
+}
+
+<div class="nq-page-title">
+    <div><h1>Product category delete</h1></div>
+    <a class="btn btn-outline-primary" asp-page="./Index">Orqaga</a>
+</div>
+
+<div class="nq-card">
+    <p><strong>@Model.Item?.Title</strong> category o'chirilsinmi?</p>
+    <form method="post">
+        <button class="btn btn-danger" type="submit">O'chirish</button>
+        <a class="btn btn-light" asp-page="./Index">Bekor qilish</a>
+    </form>
+</div>

@@ -1,0 +1,14 @@
+@page
+@model NavQurt.Server.Pages.Workers.CreateModel
+@{
+    ViewData["Title"] = "Yangi ishchi";
+}
+
+<div class="nq-page-title"><div><h1>Yangi ishchi</h1></div><a class="btn btn-outline-primary" asp-page="./Index">Orqaga</a></div>
+<form method="post" class="nq-card">
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="mb-3"><label asp-for="Input.FullName" class="form-label">FIO</label><input asp-for="Input.FullName" class="form-control" required /></div>
+    <div class="mb-3"><label asp-for="Input.PhoneNumber" class="form-label">Telefon</label><input asp-for="Input.PhoneNumber" class="form-control" /></div>
+    <div class="form-check mb-3"><input asp-for="Input.IsActive" class="form-check-input" /><label asp-for="Input.IsActive" class="form-check-label">Active</label></div>
+    <button class="btn btn-primary" type="submit">Saqlash</button>
+</form>

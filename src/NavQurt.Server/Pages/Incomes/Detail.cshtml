@@ -1,0 +1,10 @@
+@page "{id:int}"
+@model NavQurt.Server.Pages.Incomes.DetailModel
+@{
+    ViewData["Title"] = "Prixod detail";
+}
+<div class="nq-page-title"><div><h1>Prixod #@Model.Income?.Id</h1></div><a class="btn btn-outline-primary" asp-page="./Index">Orqaga</a></div>
+@if (Model.Income != null)
+{
+<div class="row g-3"><div class="col-md-4"><div class="nq-card"><dl><dt>Sana</dt><dd>@Model.Income.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</dd><dt>Sklad</dt><dd>@Model.GetWarehouseTitle(Model.Income.WarehouseId)</dd><dt>Summa</dt><dd>@Model.Income.TotalAmount.ToString("N0")</dd><dt>Izoh</dt><dd>@Model.Income.Comment</dd></dl></div></div><div class="col-md-8"><div class="nq-card"><table class="table nq-table"><thead><tr><th>Ingredient</th><th>Miqdor</th><th>Narx</th><th>Jami</th></tr></thead><tbody>@foreach (var item in Model.Income.Items) { <tr><td>@item.IngredientTitle</td><td>@item.Quantity.ToString("N3")</td><td>@item.Price.ToString("N0")</td><td>@item.Total.ToString("N0")</td></tr> }</tbody></table></div></div></div>
+}

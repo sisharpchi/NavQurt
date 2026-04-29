@@ -19,6 +19,12 @@ internal sealed class IngredientCategoryService(IMainRepository repository) : Bu
         return ResponseResult<IReadOnlyCollection<IngredientCategoryDto>>.CreateSuccess(items);
     }
 
+    public async Task<ResponseResult<IngredientCategoryDto>> GetAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var entity = await repository.GetAsync<IngredientCategory>(x => x.Id == id && !x.IsDeleted);
+        return entity == null ? NotFound<IngredientCategoryDto>("Ingredient category") : ResponseResult<IngredientCategoryDto>.CreateSuccess(entity.ToDto());
+    }
+
     public async Task<ResponseResult<IngredientCategoryDto>> CreateAsync(IngredientCategoryRequest request, CancellationToken cancellationToken = default)
     {
         if (!HasText(request.Title))
@@ -46,5 +52,18 @@ internal sealed class IngredientCategoryService(IMainRepository repository) : Bu
 
         await repository.UnitOfWork.CommitAsync(cancellationToken);
         return ResponseResult<IngredientCategoryDto>.CreateSuccess(entity.ToDto());
+    }
+
+    public async Task<ResponseResult> DeleteAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var entity = await repository.GetAsync<IngredientCategory>(x => x.Id == id && !x.IsDeleted);
+        if (entity == null)
+        {
+            return NotFound("Ingredient category");
+        }
+
+        entity.IsDeleted = true;
+        await repository.UnitOfWork.CommitAsync(cancellationToken);
+        return ResponseResult.CreateSuccess();
     }
 }

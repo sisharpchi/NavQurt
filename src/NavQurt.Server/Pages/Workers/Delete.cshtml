@@ -1,0 +1,7 @@
+@page "{id:int}"
+@model NavQurt.Server.Pages.Workers.DeleteModel
+@{
+    ViewData["Title"] = "Ishchi delete";
+}
+<div class="nq-page-title"><div><h1>Ishchi delete</h1></div><a class="btn btn-outline-primary" asp-page="./Index">Orqaga</a></div>
+<div class="nq-card"><p><strong>@Model.Item?.FullName</strong> o'chirilsinmi?</p><form method="post"><button class="btn btn-danger" type="submit">O'chirish</button> <a class="btn btn-light" asp-page="./Index">Bekor qilish</a></form></div>

@@ -1,0 +1,39 @@
+@page
+@model NavQurt.Server.Pages.ProductCategories.IndexModel
+@{
+    ViewData["Title"] = "Product category";
+}
+
+<div class="nq-page-title">
+    <div>
+        <h1>Product category</h1>
+        <div class="nq-muted">Box va combo productlarni tartibli guruhlash.</div>
+    </div>
+    <a class="btn btn-primary" asp-page="./Create">Yangi category</a>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.Message))
+{
+    <div class="alert alert-info">@Model.Message</div>
+}
+
+<div class="nq-card">
+    <table class="table nq-table">
+        <thead><tr><th>Nomi</th><th>Parent</th><th>Priority</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var item in Model.Categories)
+        {
+            <tr>
+                <td>@item.Title</td>
+                <td>@Model.GetCategoryTitle(item.ParentCategoryId)</td>
+                <td>@item.Priority</td>
+                <td>@(item.IsActive ? "Active" : "Off")</td>
+                <td class="text-end">
+                    <a class="btn btn-sm btn-outline-primary" asp-page="./Detail" asp-route-id="@item.Id">Detail</a>
+                    <a class="btn btn-sm btn-outline-danger" asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

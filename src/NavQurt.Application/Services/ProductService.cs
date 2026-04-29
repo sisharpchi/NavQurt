@@ -70,6 +70,19 @@ internal sealed class ProductService(IMainRepository repository) : BusinessServi
         return ResponseResult<ProductDto>.CreateSuccess(entity.ToDto());
     }
 
+    public async Task<ResponseResult> DeleteAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var entity = await repository.GetAsync<Product>(x => x.Id == id && !x.IsDeleted);
+        if (entity == null)
+        {
+            return NotFound("Product");
+        }
+
+        entity.IsDeleted = true;
+        await repository.UnitOfWork.CommitAsync(cancellationToken);
+        return ResponseResult.CreateSuccess();
+    }
+
     private IQueryable<Product> ProductQuery() =>
         repository.Query<Product>()
             .Include(x => x.ComboItems)

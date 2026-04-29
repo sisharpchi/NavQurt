@@ -1,0 +1,13 @@
+@page
+@model NavQurt.Server.Pages.Products.IndexModel
+@{
+    ViewData["Title"] = "Productlar";
+}
+<div class="nq-page-title"><div><h1>Productlar</h1><div class="nq-muted">Sotiladigan qurut boxlar va combo setlar.</div></div><a class="btn btn-primary" asp-page="./Create">Yangi product</a></div>
+@if (!string.IsNullOrWhiteSpace(Model.Message)) { <div class="alert alert-info">@Model.Message</div> }
+<div class="nq-card"><table class="table nq-table"><thead><tr><th>Nomi</th><th>Category</th><th>Narx</th><th>Type</th><th>Combo</th><th>Status</th><th></th></tr></thead><tbody>
+@foreach (var item in Model.Products)
+{
+<tr><td>@item.Title<br /><span class="nq-muted">@item.Description</span></td><td>@Model.GetCategoryTitle(item.ProductCategoryId)</td><td>@item.Price.ToString("N0")</td><td>@(item.IsCombo ? "Combo" : "Product")</td><td>@string.Join(", ", item.ComboItems.Select(x => $"{x.ProductTitle} x{x.Quantity:N2}"))</td><td>@(item.IsActive ? "Active" : "Off")</td><td class="text-end"><a class="btn btn-sm btn-outline-primary" asp-page="./Detail" asp-route-id="@item.Id">Detail</a> <a class="btn btn-sm btn-outline-danger" asp-page="./Delete" asp-route-id="@item.Id">Delete</a></td></tr>
+}
+</tbody></table></div>

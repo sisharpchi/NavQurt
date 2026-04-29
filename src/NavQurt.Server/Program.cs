@@ -29,11 +29,26 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.ExpireTimeSpan = TimeSpan.FromHours(36);
     options.Cookie.MaxAge = options.ExpireTimeSpan;
     options.SlidingExpiration = true;
+    options.LoginPath = "/login1";
+    options.Events.OnRedirectToLogin = context =>
+    {
+        var loginPath = context.Request.Path.StartsWithSegments("/Admin", StringComparison.OrdinalIgnoreCase)
+            ? "/login2"
+            : options.LoginPath.Value;
+
+        var returnUrl = Uri.EscapeDataString(context.Request.PathBase + context.Request.Path + context.Request.QueryString);
+        context.Response.Redirect($"{loginPath}?ReturnUrl={returnUrl}");
+
+        return Task.CompletedTask;
+    };
 });
 
 builder.Services.AddControllers();
 builder.Services.AddRazorPages(options =>
 {
+    options.Conventions.AuthorizeFolder("/");
+    options.Conventions.AllowAnonymousToPage("/Login2");
+    options.Conventions.AddAreaPageRoute("Identity", "/Account/Login", "/login1");
     options.Conventions.AuthorizeAreaFolder("Admin", "/", Permissions.SuperAdmin);
 });
 

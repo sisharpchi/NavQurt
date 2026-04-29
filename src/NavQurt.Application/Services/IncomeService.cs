@@ -21,6 +21,16 @@ internal sealed class IncomeService(IMainRepository repository, StockMutationSer
         return ResponseResult<IReadOnlyCollection<IncomeDto>>.CreateSuccess(items.Select(x => x.ToDto()).ToList());
     }
 
+    public async Task<ResponseResult<IncomeDto>> GetAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var entity = await repository.Query<Income>()
+            .Include(x => x.Items)
+            .ThenInclude(x => x.Ingredient)
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+        return entity == null ? NotFound<IncomeDto>("Income") : ResponseResult<IncomeDto>.CreateSuccess(entity.ToDto());
+    }
+
     public async Task<ResponseResult<IncomeDto>> CreateAsync(CreateIncomeRequest request, CancellationToken cancellationToken = default)
     {
         if (request.Items.Count == 0)

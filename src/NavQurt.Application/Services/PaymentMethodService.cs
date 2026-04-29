@@ -19,6 +19,12 @@ internal sealed class PaymentMethodService(IMainRepository repository) : Busines
         return ResponseResult<IReadOnlyCollection<PaymentMethodDto>>.CreateSuccess(items);
     }
 
+    public async Task<ResponseResult<PaymentMethodDto>> GetAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var entity = await repository.GetAsync<PaymentMethod>(x => x.Id == id && !x.IsDeleted);
+        return entity == null ? NotFound<PaymentMethodDto>("Payment method") : ResponseResult<PaymentMethodDto>.CreateSuccess(entity.ToDto());
+    }
+
     public async Task<ResponseResult<PaymentMethodDto>> CreateAsync(PaymentMethodRequest request, CancellationToken cancellationToken = default)
     {
         if (!HasText(request.Title))
@@ -45,5 +51,18 @@ internal sealed class PaymentMethodService(IMainRepository repository) : Busines
 
         await repository.UnitOfWork.CommitAsync(cancellationToken);
         return ResponseResult<PaymentMethodDto>.CreateSuccess(entity.ToDto());
+    }
+
+    public async Task<ResponseResult> DeleteAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var entity = await repository.GetAsync<PaymentMethod>(x => x.Id == id && !x.IsDeleted);
+        if (entity == null)
+        {
+            return NotFound("Payment method");
+        }
+
+        entity.IsDeleted = true;
+        await repository.UnitOfWork.CommitAsync(cancellationToken);
+        return ResponseResult.CreateSuccess();
     }
 }

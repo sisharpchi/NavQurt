@@ -29,7 +29,6 @@ public class MainDatabaseMigratorService : BackgroundService
             _logger.LogInformation("Applying MainDbContext migrations...");
             using var scope = _scopeFactory.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<MainDbContext>();
-            await MarkInitialMigrationAppliedForExistingDatabaseAsync(dbContext, stoppingToken);
             await dbContext.Database.MigrateAsync(stoppingToken);
             _logger.LogInformation("MainDbContext migrations applied.");
         }
@@ -44,33 +43,4 @@ public class MainDatabaseMigratorService : BackgroundService
         }
     }
 
-    private async Task MarkInitialMigrationAppliedForExistingDatabaseAsync(MainDbContext dbContext, CancellationToken cancellationToken)
-    {
-        const string initialMigration = "20260428072028_InitialIdentityOpenIddict";
-
-        var appliedMigrations = await dbContext.Database.GetAppliedMigrationsAsync(cancellationToken);
-        if (appliedMigrations.Contains(initialMigration))
-        {
-            return;
-        }
-
-        var openIdTableExists = await dbContext.Database
-            .SqlQueryRaw<bool>("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'OpenIddictEntityFrameworkCoreApplications') AS \"Value\"")
-            .SingleAsync(cancellationToken);
-
-        if (!openIdTableExists)
-        {
-            return;
-        }
-
-        await dbContext.Database.ExecuteSqlRawAsync(
-            """
-            INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
-            VALUES ('20260428072028_InitialIdentityOpenIddict', '8.0.26')
-            ON CONFLICT ("MigrationId") DO NOTHING;
-            """,
-            cancellationToken);
-
-        _logger.LogInformation("Marked existing identity/openiddict schema as migrated.");
-    }
 }

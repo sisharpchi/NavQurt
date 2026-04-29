@@ -19,6 +19,12 @@ internal sealed class WorkerService(IMainRepository repository) : BusinessServic
         return ResponseResult<IReadOnlyCollection<WorkerDto>>.CreateSuccess(items);
     }
 
+    public async Task<ResponseResult<WorkerDto>> GetAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var entity = await repository.GetAsync<Worker>(x => x.Id == id && !x.IsDeleted);
+        return entity == null ? NotFound<WorkerDto>("Worker") : ResponseResult<WorkerDto>.CreateSuccess(entity.ToDto());
+    }
+
     public async Task<ResponseResult<WorkerDto>> CreateAsync(WorkerRequest request, CancellationToken cancellationToken = default)
     {
         if (!HasText(request.FullName))
@@ -46,5 +52,18 @@ internal sealed class WorkerService(IMainRepository repository) : BusinessServic
 
         await repository.UnitOfWork.CommitAsync(cancellationToken);
         return ResponseResult<WorkerDto>.CreateSuccess(entity.ToDto());
+    }
+
+    public async Task<ResponseResult> DeleteAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var entity = await repository.GetAsync<Worker>(x => x.Id == id && !x.IsDeleted);
+        if (entity == null)
+        {
+            return NotFound("Worker");
+        }
+
+        entity.IsDeleted = true;
+        await repository.UnitOfWork.CommitAsync(cancellationToken);
+        return ResponseResult.CreateSuccess();
     }
 }

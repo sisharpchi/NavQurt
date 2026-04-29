@@ -19,6 +19,12 @@ internal sealed class IngredientService(IMainRepository repository) : BusinessSe
         return ResponseResult<IReadOnlyCollection<IngredientDto>>.CreateSuccess(items);
     }
 
+    public async Task<ResponseResult<IngredientDto>> GetAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var entity = await repository.GetAsync<Ingredient>(x => x.Id == id && !x.IsDeleted);
+        return entity == null ? NotFound<IngredientDto>("Ingredient") : ResponseResult<IngredientDto>.CreateSuccess(entity.ToDto());
+    }
+
     public async Task<ResponseResult<IngredientDto>> CreateAsync(IngredientRequest request, CancellationToken cancellationToken = default)
     {
         var validation = await ValidateAsync(request, cancellationToken);
@@ -53,6 +59,19 @@ internal sealed class IngredientService(IMainRepository repository) : BusinessSe
         await repository.UnitOfWork.CommitAsync(cancellationToken);
 
         return ResponseResult<IngredientDto>.CreateSuccess(entity.ToDto());
+    }
+
+    public async Task<ResponseResult> DeleteAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var entity = await repository.GetAsync<Ingredient>(x => x.Id == id && !x.IsDeleted);
+        if (entity == null)
+        {
+            return NotFound("Ingredient");
+        }
+
+        entity.IsDeleted = true;
+        await repository.UnitOfWork.CommitAsync(cancellationToken);
+        return ResponseResult.CreateSuccess();
     }
 
     private async Task<ResponseResult> ValidateAsync(IngredientRequest request, CancellationToken cancellationToken)

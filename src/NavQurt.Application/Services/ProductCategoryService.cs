@@ -20,6 +20,12 @@ internal sealed class ProductCategoryService(IMainRepository repository) : Busin
         return ResponseResult<IReadOnlyCollection<ProductCategoryDto>>.CreateSuccess(items);
     }
 
+    public async Task<ResponseResult<ProductCategoryDto>> GetAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var entity = await repository.GetAsync<ProductCategory>(x => x.Id == id && !x.IsDeleted);
+        return entity == null ? NotFound<ProductCategoryDto>("Kategoriya") : ResponseResult<ProductCategoryDto>.CreateSuccess(entity.ToDto());
+    }
+
     public async Task<ResponseResult<ProductCategoryDto>> CreateAsync(ProductCategoryRequest request, CancellationToken cancellationToken = default)
     {
         if (!HasText(request.Title))
@@ -66,5 +72,18 @@ internal sealed class ProductCategoryService(IMainRepository repository) : Busin
 
         await repository.UnitOfWork.CommitAsync(cancellationToken);
         return ResponseResult<ProductCategoryDto>.CreateSuccess(entity.ToDto());
+    }
+
+    public async Task<ResponseResult> DeleteAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var entity = await repository.GetAsync<ProductCategory>(x => x.Id == id && !x.IsDeleted);
+        if (entity == null)
+        {
+            return NotFound("Kategoriya");
+        }
+
+        entity.IsDeleted = true;
+        await repository.UnitOfWork.CommitAsync(cancellationToken);
+        return ResponseResult.CreateSuccess();
     }
 }
