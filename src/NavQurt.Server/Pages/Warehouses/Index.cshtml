@@ -5,8 +5,11 @@
 }
 
 <div class="nq-page-title">
-    <div><h1>Skladlar</h1></div>
-    <a class="btn btn-primary" asp-page="./Create">Yangi</a>
+    <div>
+        <h1>Skladlar</h1>
+        <div class="nq-muted">@Model.ItemsCount ta sklad. Qoldiq, prixod va order chiqimlari shu yerga bog'lanadi.</div>
+    </div>
+    <a class="btn btn-primary" asp-page="./Create">Yangi sklad</a>
 </div>
 
 @if (!string.IsNullOrWhiteSpace(Model.Message))
@@ -14,21 +17,49 @@
     <div class="alert alert-info">@Model.Message</div>
 }
 
+<form method="get" class="nq-card nq-filter-card mb-3">
+    <div class="nq-filter-grid compact">
+        <div>
+            <label class="form-label" asp-for="Search">Qidirish</label>
+            <input class="form-control" asp-for="Search" placeholder="Sklad nomi" />
+        </div>
+        <div>
+            <label class="form-label" asp-for="Status">Status</label>
+            <select class="form-select" asp-for="Status">
+                <option value="">Hammasi</option>
+                <option value="true">Active</option>
+                <option value="false">Off</option>
+            </select>
+        </div>
+        <div class="nq-filter-actions">
+            <button class="btn btn-outline-primary" type="submit">Search</button>
+            <a class="btn btn-light" asp-page="./Index">Tozalash</a>
+        </div>
+    </div>
+</form>
+
 <div class="nq-card">
-    <table class="table nq-table">
-        <thead><tr><th>Nomi</th><th>Status</th><th></th></tr></thead>
-        <tbody>
-        @foreach (var item in Model.Items)
-        {
-            <tr>
-                <td>@item.Title</td>
-                <td>@(item.IsActive ? "Active" : "Off")</td>
-                <td class="text-end">
-                    <a class="btn btn-sm btn-outline-primary" asp-page="./Detail" asp-route-id="@item.Id">Detail</a>
-                    <a class="btn btn-sm btn-outline-danger" asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
-                </td>
-            </tr>
-        }
-        </tbody>
-    </table>
+    <div class="table-responsive">
+        <table class="table nq-table">
+            <thead>
+            <tr><th>Nomi</th><th>Asosiy</th><th>Status</th><th></th></tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td class="fw-semibold">@item.Title</td>
+                    <td>@(item.IsMain ? "Ha" : "-")</td>
+                    <td><span class="nq-status @(item.IsActive ? "success" : "muted")">@(item.IsActive ? "Active" : "Off")</span></td>
+                    <td class="text-end">
+                        <div class="nq-table-actions">
+                            <a class="btn btn-sm btn-outline-primary" asp-page="./Detail" asp-route-id="@item.Id">Detail</a>
+                            <a class="btn btn-sm btn-outline-danger" asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
+                        </div>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
 </div>

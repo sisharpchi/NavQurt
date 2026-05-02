@@ -3,11 +3,91 @@
 @{
     ViewData["Title"] = "Prixod";
 }
-<div class="nq-page-title"><div><h1>Prixod</h1><div class="nq-muted">Ingredientlarni skladga kirim qilish.</div></div><a class="btn btn-primary" asp-page="./Create">Yangi prixod</a></div>
-@if (!string.IsNullOrWhiteSpace(Model.Message)) { <div class="alert alert-info">@Model.Message</div> }
-<div class="nq-card"><table class="table nq-table"><thead><tr><th>Sana</th><th>Sklad</th><th>Summa</th><th>Izoh</th><th></th></tr></thead><tbody>
-@foreach (var item in Model.Incomes)
+
+<div class="nq-page-title">
+    <div>
+        <h1>Prixod</h1>
+        <div class="nq-muted">Skladga kirim qilingan ingredient hujjatlari.</div>
+    </div>
+    <a class="btn btn-primary" asp-page="./Create">Yangi prixod</a>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.Message))
 {
-<tr><td>@item.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td><td>@Model.GetWarehouseTitle(item.WarehouseId)</td><td>@item.TotalAmount.ToString("N0")</td><td>@item.Comment</td><td class="text-end"><a class="btn btn-sm btn-outline-primary" asp-page="./Detail" asp-route-id="@item.Id">Detail</a></td></tr>
+    <div class="alert alert-success">@Model.Message</div>
 }
-</tbody></table></div>
+
+<form method="get" class="nq-card mb-3">
+    <div class="row g-2 align-items-end">
+        <div class="col-xl-2 col-md-6">
+            <label asp-for="FromDate" class="form-label">Dan</label>
+            <input asp-for="FromDate" type="date" class="form-control" />
+        </div>
+        <div class="col-xl-2 col-md-6">
+            <label asp-for="ToDate" class="form-label">Gacha</label>
+            <input asp-for="ToDate" type="date" class="form-control" />
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <label asp-for="WarehouseId" class="form-label">Sklad</label>
+            <select asp-for="WarehouseId" class="form-select">
+                <option value="">Barchasi</option>
+                @foreach (var warehouse in Model.Warehouses)
+                {
+                    <option value="@warehouse.Id">@warehouse.Title</option>
+                }
+            </select>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <label asp-for="Search" class="form-label">Qidirish</label>
+            <input asp-for="Search" class="form-control" placeholder="Izoh yoki ingredient" />
+        </div>
+        <div class="col-xl-2 col-md-12 d-grid">
+            <button class="btn btn-primary" type="submit">Shakllantirish</button>
+        </div>
+    </div>
+</form>
+
+<div class="nq-card">
+    <div class="d-flex flex-wrap gap-2 mb-3">
+        <div class="nq-summary-pill">
+            <span>Hujjat</span>
+            <strong>@Model.ItemsCount</strong>
+        </div>
+        <div class="nq-summary-pill">
+            <span>Jami</span>
+            <strong>@Model.Total.ToString("N0")</strong>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table nq-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Prixod sanasi</th>
+                    <th>Qabul qilingan</th>
+                    <th>Sklad</th>
+                    <th>Izoh</th>
+                    <th class="text-end">Summa</th>
+                    <th class="text-end">Amal</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.Incomes)
+            {
+                <tr>
+                    <td class="fw-semibold">#@item.Id</td>
+                    <td>@item.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                    <td>@item.AcceptedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                    <td>@item.WarehouseTitle</td>
+                    <td>@(string.IsNullOrWhiteSpace(item.Comment) ? "-" : item.Comment)</td>
+                    <td class="text-end">@item.TotalAmount.ToString("N0")</td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-primary" asp-page="./Detail" asp-route-id="@item.Id">Detail</a>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

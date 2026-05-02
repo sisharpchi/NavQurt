@@ -7,22 +7,39 @@
 <div class="nq-page-title">
     <div>
         <h1>Customerlar</h1>
-        <div class="nq-muted">Order orqali yaratilgan mijozlar.</div>
+        <div class="nq-muted">@Model.ItemsCount ta mijoz. Order orqali yaratilgan customerlar.</div>
     </div>
 </div>
 
+<form method="get" class="nq-card nq-filter-card mb-3">
+    <div class="nq-filter-grid compact">
+        <div>
+            <label class="form-label" asp-for="Search">Qidirish</label>
+            <input class="form-control" asp-for="Search" placeholder="FIO, telefon yoki location" />
+        </div>
+        <div class="nq-filter-actions">
+            <button class="btn btn-outline-primary" type="submit">Search</button>
+            <a class="btn btn-light" asp-page="./Index">Tozalash</a>
+        </div>
+    </div>
+</form>
+
 <div class="nq-card">
-    <table class="table nq-table">
-        <thead><tr><th>FIO</th><th>Telefon</th><th>Location</th></tr></thead>
-        <tbody>
-        @foreach (var item in Model.Customers)
-        {
-            <tr>
-                <td>@item.FullName</td>
-                <td>@item.PhoneNumber</td>
-                <td>@item.Location</td>
-            </tr>
-        }
-        </tbody>
-    </table>
+    <div class="table-responsive">
+        <table class="table nq-table">
+            <thead>
+            <tr><th>FIO</th><th>Telefon</th><th>Location</th></tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.Customers)
+            {
+                <tr>
+                    <td class="fw-semibold">@item.FullName</td>
+                    <td>@item.PhoneNumber</td>
+                    <td>@item.Location</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
 </div>

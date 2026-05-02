@@ -10,7 +10,7 @@ namespace NavQurt.Server.Controllers;
 public class OrdersController(IOrderService service) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetList(CancellationToken cancellationToken) => Ok(await service.GetListAsync(cancellationToken));
+    public async Task<IActionResult> GetList([FromQuery] OrderListRequest request, CancellationToken cancellationToken) => Ok(await service.GetListAsync(request, cancellationToken));
 
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Get(int id, CancellationToken cancellationToken) => Ok(await service.GetAsync(id, cancellationToken));

@@ -11,13 +11,33 @@ internal sealed class WarehouseService(IMainRepository repository) : BusinessSer
 {
     public async Task<ResponseResult<IReadOnlyCollection<WarehouseDto>>> GetListAsync(CancellationToken cancellationToken = default)
     {
-        var items = await repository.Query<Warehouse>(x => !x.IsDeleted)
+        var result = await GetListAsync(new WarehouseListRequest(), cancellationToken);
+        return result.Success
+            ? ResponseResult<IReadOnlyCollection<WarehouseDto>>.CreateSuccess(result.Value!.Items)
+            : ResponseResult<IReadOnlyCollection<WarehouseDto>>.CreateError(result.Error!, result.ErrorCode);
+    }
+
+    public async Task<ResponseResult<ListResponse<WarehouseDto>>> GetListAsync(WarehouseListRequest request, CancellationToken cancellationToken = default)
+    {
+        var query = repository.Query<Warehouse>(x => !x.IsDeleted);
+
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var search = request.Search.Trim().ToLower();
+            query = query.Where(x => x.Title.ToLower().Contains(search));
+        }
+
+        if (request.IsActive.HasValue)
+        {
+            query = query.Where(x => x.IsActive == request.IsActive.Value);
+        }
+
+        var items = await query
             .OrderByDescending(x => x.IsMain)
             .ThenBy(x => x.Title)
-            .Select(x => x.ToDto())
             .ToListAsync(cancellationToken);
 
-        return ResponseResult<IReadOnlyCollection<WarehouseDto>>.CreateSuccess(items);
+        return ResponseResult<ListResponse<WarehouseDto>>.CreateSuccess(new ListResponse<WarehouseDto>(items.Select(x => x.ToDto()).ToList(), items.Count));
     }
 
     public async Task<ResponseResult<WarehouseDto>> GetAsync(int id, CancellationToken cancellationToken = default)
@@ -46,6 +66,11 @@ internal sealed class WarehouseService(IMainRepository repository) : BusinessSer
         if (entity == null)
         {
             return NotFound<WarehouseDto>("Warehouse");
+        }
+
+        if (!HasText(request.Title))
+        {
+            return BadRequest<WarehouseDto>("Warehouse nomi majburiy.");
         }
 
         entity.Title = request.Title.Trim();

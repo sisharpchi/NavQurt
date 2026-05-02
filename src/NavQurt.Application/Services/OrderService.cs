@@ -15,11 +15,52 @@ internal sealed class OrderService(
 {
     public async Task<ResponseResult<IReadOnlyCollection<OrderDto>>> GetListAsync(CancellationToken cancellationToken = default)
     {
-        var items = await OrderQuery()
+        var result = await GetListAsync(new OrderListRequest(), cancellationToken);
+        return result.Success
+            ? ResponseResult<IReadOnlyCollection<OrderDto>>.CreateSuccess(result.Value!.Items)
+            : ResponseResult<IReadOnlyCollection<OrderDto>>.CreateError(result.Error!, result.ErrorCode);
+    }
+
+    public async Task<ResponseResult<OrderListResponse>> GetListAsync(OrderListRequest request, CancellationToken cancellationToken = default)
+    {
+        var query = OrderQuery();
+
+        if (request.FromDate.HasValue)
+        {
+            query = query.Where(x => x.CreatedAt >= request.FromDate.Value.Date);
+        }
+
+        if (request.ToDate.HasValue)
+        {
+            var toDate = request.ToDate.Value.Date.AddDays(1);
+            query = query.Where(x => x.CreatedAt < toDate);
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var search = request.Search.Trim().ToLower();
+            query = query.Where(x =>
+                x.OrderNumber.ToLower().Contains(search) ||
+                x.CustomerFullName.ToLower().Contains(search) ||
+                x.CustomerPhoneNumber.ToLower().Contains(search) ||
+                (x.CustomerLocation != null && x.CustomerLocation.ToLower().Contains(search)));
+        }
+
+        if (request.WorkerId.HasValue)
+        {
+            query = query.Where(x => x.WorkerId == request.WorkerId.Value);
+        }
+
+        if (request.WarehouseId.HasValue)
+        {
+            query = query.Where(x => x.WarehouseId == request.WarehouseId.Value);
+        }
+
+        var items = await query
             .OrderByDescending(x => x.CreatedAt)
             .ToListAsync(cancellationToken);
 
-        return ResponseResult<IReadOnlyCollection<OrderDto>>.CreateSuccess(items.Select(x => x.ToDto()).ToList());
+        return ResponseResult<OrderListResponse>.CreateSuccess(new OrderListResponse(items.Select(x => x.ToDto()).ToList(), items.Count, items.Sum(x => x.TotalAmount)));
     }
 
     public async Task<ResponseResult<OrderDto>> GetAsync(int id, CancellationToken cancellationToken = default)
@@ -126,6 +167,8 @@ internal sealed class OrderService(
 
     private IQueryable<Order> OrderQuery() =>
         repository.Query<Order>()
+            .Include(x => x.Worker)
+            .Include(x => x.Warehouse)
             .Include(x => x.Items)
             .Include(x => x.Payments)
             .ThenInclude(x => x.PaymentMethod);

@@ -9,6 +9,41 @@ namespace NavQurt.Application.Services;
 
 internal sealed class RecipeService(IMainRepository repository, RecipeCalculator calculator) : BusinessServiceBase, IRecipeService
 {
+    public async Task<ResponseResult<RecipeListResponse>> GetListAsync(RecipeListRequest request, CancellationToken cancellationToken = default)
+    {
+        var query = RecipeQuery().Where(x => !x.IsDeleted);
+
+        if (string.Equals(request.TargetType, "Product", StringComparison.OrdinalIgnoreCase))
+        {
+            query = query.Where(x => x.ProductId.HasValue);
+        }
+        else if (string.Equals(request.TargetType, "Ingredient", StringComparison.OrdinalIgnoreCase))
+        {
+            query = query.Where(x => x.IngredientId.HasValue);
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var search = request.Search.Trim().ToLower();
+            query = query.Where(x =>
+                (x.Product != null && x.Product.Title.ToLower().Contains(search)) ||
+                (x.Ingredient != null && x.Ingredient.Title.ToLower().Contains(search)) ||
+                x.Items.Any(item => item.Ingredient.Title.ToLower().Contains(search)));
+        }
+
+        var items = await query
+            .OrderBy(x => x.Product != null ? x.Product.Title : x.Ingredient!.Title)
+            .ToListAsync(cancellationToken);
+
+        return ResponseResult<RecipeListResponse>.CreateSuccess(new RecipeListResponse(items.Select(x => x.ToListDto()).ToList(), items.Count));
+    }
+
+    public async Task<ResponseResult<RecipeDto>> GetAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var recipe = await RecipeQuery().FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted, cancellationToken);
+        return recipe == null ? NotFound<RecipeDto>("Recipe") : ResponseResult<RecipeDto>.CreateSuccess(recipe.ToDto());
+    }
+
     public async Task<ResponseResult<RecipeDto>> GetByProductAsync(int productId, CancellationToken cancellationToken = default)
     {
         var recipe = await RecipeQuery().FirstOrDefaultAsync(x => x.ProductId == productId && !x.IsDeleted, cancellationToken);
@@ -65,8 +100,23 @@ internal sealed class RecipeService(IMainRepository repository, RecipeCalculator
         return ResponseResult<RecipeDto>.CreateSuccess(recipe.ToDto());
     }
 
+    public async Task<ResponseResult> DeleteAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var recipe = await repository.GetAsync<Recipe>(x => x.Id == id && !x.IsDeleted);
+        if (recipe == null)
+        {
+            return NotFound("Recipe");
+        }
+
+        recipe.IsDeleted = true;
+        await repository.UnitOfWork.CommitAsync(cancellationToken);
+        return ResponseResult.CreateSuccess();
+    }
+
     private IQueryable<Recipe> RecipeQuery() =>
         repository.Query<Recipe>()
+            .Include(x => x.Product)
+            .Include(x => x.Ingredient)
             .Include(x => x.Items)
             .ThenInclude(x => x.Ingredient);
 

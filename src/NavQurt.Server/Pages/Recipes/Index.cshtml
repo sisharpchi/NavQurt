@@ -7,8 +7,9 @@
 <div class="nq-page-title">
     <div>
         <h1>Recipe</h1>
-        <div class="nq-muted">Product yoki ingredient nimadan tashkil topishini kiriting.</div>
+        <div class="nq-muted">@Model.ItemsCount ta recipe. Product va yarim tayyor ingredient tarkibi.</div>
     </div>
+    <a class="btn btn-primary" asp-page="./Create">Yangi recipe</a>
 </div>
 
 @if (!string.IsNullOrWhiteSpace(Model.Message))
@@ -16,73 +17,58 @@
     <div class="alert alert-info">@Model.Message</div>
 }
 
-<div class="row g-3">
-    <div class="col-lg-5">
-        <div class="nq-card">
-            <form method="post">
-                <div class="mb-3">
-                    <label asp-for="Input.TargetType" class="form-label">Recipe turi</label>
-                    <select asp-for="Input.TargetType" class="form-select">
-                        <option value="Product">Product</option>
-                        <option value="Ingredient">Ingredient</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label asp-for="Input.ProductId" class="form-label">Product</label>
-                    <select asp-for="Input.ProductId" class="form-select">
-                        <option value="">Tanlang</option>
-                        @foreach (var product in Model.Products)
-                        {
-                            <option value="@product.Id">@product.Title</option>
-                        }
-                    </select>
-                    <div class="nq-muted">Recipe turi Product bo‘lsa ishlatiladi.</div>
-                </div>
-                <div class="mb-3">
-                    <label asp-for="Input.IngredientId" class="form-label">Ingredient</label>
-                    <select asp-for="Input.IngredientId" class="form-select">
-                        <option value="">Tanlang</option>
-                        @foreach (var ingredient in Model.Ingredients)
-                        {
-                            <option value="@ingredient.Id">@ingredient.Title</option>
-                        }
-                    </select>
-                    <div class="nq-muted">Recipe turi Ingredient bo‘lsa ishlatiladi.</div>
-                </div>
-                <div class="mb-3">
-                    <label asp-for="Input.PortionYield" class="form-label">Chiqim / portion yield</label>
-                    <input asp-for="Input.PortionYield" class="form-control" type="number" step="0.001" min="0.001" />
-                </div>
-
-                <h6>Ingredient tarkibi</h6>
-                @for (var i = 0; i < Model.Input.Items.Count; i++)
-                {
-                    <div class="row g-2 mb-2">
-                        <div class="col-8">
-                            <select asp-for="Input.Items[i].IngredientId" class="form-select">
-                                <option value="0">Ingredient tanlang</option>
-                                @foreach (var ingredient in Model.Ingredients)
-                                {
-                                    <option value="@ingredient.Id">@ingredient.Title (@ingredient.Unit)</option>
-                                }
-                            </select>
-                        </div>
-                        <div class="col-4">
-                            <input asp-for="Input.Items[i].Quantity" class="form-control" type="number" step="0.001" placeholder="Miqdor" />
-                        </div>
-                    </div>
-                }
-
-                <button class="btn btn-primary mt-2" type="submit">Recipe saqlash</button>
-            </form>
+<form method="get" class="nq-card nq-filter-card mb-3">
+    <div class="nq-filter-grid compact">
+        <div>
+            <label class="form-label" asp-for="Search">Qidirish</label>
+            <input class="form-control" asp-for="Search" placeholder="Target yoki ingredient" />
+        </div>
+        <div>
+            <label class="form-label" asp-for="TargetType">Turi</label>
+            <select class="form-select" asp-for="TargetType">
+                <option value="">Hammasi</option>
+                <option value="Product">Product</option>
+                <option value="Ingredient">Ingredient</option>
+            </select>
+        </div>
+        <div class="nq-filter-actions">
+            <button class="btn btn-outline-primary" type="submit">Search</button>
+            <a class="btn btn-light" asp-page="./Index">Tozalash</a>
         </div>
     </div>
-    <div class="col-lg-7">
-        <div class="nq-card">
-            <h5 class="mb-3">Eslatma</h5>
-            <p class="mb-2">Product recipe sotuv paytida ingredient qoldig‘idan ayriladi.</p>
-            <p class="mb-2">Ingredient recipe yarim tayyor mahsulot uchun ishlaydi va recursive hisoblanadi.</p>
-            <p class="mb-0">Combo productda “combo o‘z recipe’sidan ayrilsin” yoqilgan bo‘lsa combo recipe ishlaydi, aks holda ichidagi productlar recipe’si ishlaydi.</p>
-        </div>
+</form>
+
+<div class="nq-card">
+    <div class="table-responsive">
+        <table class="table nq-table">
+            <thead>
+            <tr>
+                <th>Target</th>
+                <th>Turi</th>
+                <th>Portion</th>
+                <th>Itemlar</th>
+                <th>Jami miqdor</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.Recipes)
+            {
+                <tr>
+                    <td class="fw-semibold">@item.TargetTitle</td>
+                    <td><span class="nq-status @(item.TargetType == "Product" ? "info" : "warning")">@item.TargetType</span></td>
+                    <td>@item.PortionYield.ToString("N3")</td>
+                    <td>@item.ItemsCount</td>
+                    <td>@item.ItemsTotalQuantity.ToString("N3")</td>
+                    <td class="text-end">
+                        <div class="nq-table-actions">
+                            <a class="btn btn-sm btn-outline-primary" asp-page="./Detail" asp-route-id="@item.Id">Detail</a>
+                            <a class="btn btn-sm btn-outline-danger" asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
+                        </div>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
     </div>
 </div>

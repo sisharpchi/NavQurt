@@ -10,5 +10,5 @@ namespace NavQurt.Server.Controllers;
 public class CustomersController(ICustomerService service) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetList(CancellationToken cancellationToken) => Ok(await service.GetListAsync(cancellationToken));
+    public async Task<IActionResult> GetList([FromQuery] CustomerListRequest request, CancellationToken cancellationToken) => Ok(await service.GetListAsync(request, cancellationToken));
 }

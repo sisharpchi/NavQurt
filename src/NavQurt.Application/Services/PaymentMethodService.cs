@@ -11,12 +11,32 @@ internal sealed class PaymentMethodService(IMainRepository repository) : Busines
 {
     public async Task<ResponseResult<IReadOnlyCollection<PaymentMethodDto>>> GetListAsync(CancellationToken cancellationToken = default)
     {
-        var items = await repository.Query<PaymentMethod>(x => !x.IsDeleted)
+        var result = await GetListAsync(new PaymentMethodListRequest(), cancellationToken);
+        return result.Success
+            ? ResponseResult<IReadOnlyCollection<PaymentMethodDto>>.CreateSuccess(result.Value!.Items)
+            : ResponseResult<IReadOnlyCollection<PaymentMethodDto>>.CreateError(result.Error!, result.ErrorCode);
+    }
+
+    public async Task<ResponseResult<ListResponse<PaymentMethodDto>>> GetListAsync(PaymentMethodListRequest request, CancellationToken cancellationToken = default)
+    {
+        var query = repository.Query<PaymentMethod>(x => !x.IsDeleted);
+
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var search = request.Search.Trim().ToLower();
+            query = query.Where(x => x.Title.ToLower().Contains(search));
+        }
+
+        if (request.IsActive.HasValue)
+        {
+            query = query.Where(x => x.IsActive == request.IsActive.Value);
+        }
+
+        var items = await query
             .OrderBy(x => x.Title)
-            .Select(x => x.ToDto())
             .ToListAsync(cancellationToken);
 
-        return ResponseResult<IReadOnlyCollection<PaymentMethodDto>>.CreateSuccess(items);
+        return ResponseResult<ListResponse<PaymentMethodDto>>.CreateSuccess(new ListResponse<PaymentMethodDto>(items.Select(x => x.ToDto()).ToList(), items.Count));
     }
 
     public async Task<ResponseResult<PaymentMethodDto>> GetAsync(int id, CancellationToken cancellationToken = default)
@@ -44,6 +64,11 @@ internal sealed class PaymentMethodService(IMainRepository repository) : Busines
         if (entity == null)
         {
             return NotFound<PaymentMethodDto>("Payment method");
+        }
+
+        if (!HasText(request.Title))
+        {
+            return BadRequest<PaymentMethodDto>("Payment method nomi majburiy.");
         }
 
         entity.Title = request.Title.Trim();

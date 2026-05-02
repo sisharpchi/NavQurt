@@ -11,12 +11,32 @@ internal sealed class WorkerService(IMainRepository repository) : BusinessServic
 {
     public async Task<ResponseResult<IReadOnlyCollection<WorkerDto>>> GetListAsync(CancellationToken cancellationToken = default)
     {
-        var items = await repository.Query<Worker>(x => !x.IsDeleted)
+        var result = await GetListAsync(new WorkerListRequest(), cancellationToken);
+        return result.Success
+            ? ResponseResult<IReadOnlyCollection<WorkerDto>>.CreateSuccess(result.Value!.Items)
+            : ResponseResult<IReadOnlyCollection<WorkerDto>>.CreateError(result.Error!, result.ErrorCode);
+    }
+
+    public async Task<ResponseResult<ListResponse<WorkerDto>>> GetListAsync(WorkerListRequest request, CancellationToken cancellationToken = default)
+    {
+        var query = repository.Query<Worker>(x => !x.IsDeleted);
+
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var search = request.Search.Trim().ToLower();
+            query = query.Where(x => x.FullName.ToLower().Contains(search) || (x.PhoneNumber != null && x.PhoneNumber.ToLower().Contains(search)));
+        }
+
+        if (request.IsActive.HasValue)
+        {
+            query = query.Where(x => x.IsActive == request.IsActive.Value);
+        }
+
+        var items = await query
             .OrderBy(x => x.FullName)
-            .Select(x => x.ToDto())
             .ToListAsync(cancellationToken);
 
-        return ResponseResult<IReadOnlyCollection<WorkerDto>>.CreateSuccess(items);
+        return ResponseResult<ListResponse<WorkerDto>>.CreateSuccess(new ListResponse<WorkerDto>(items.Select(x => x.ToDto()).ToList(), items.Count));
     }
 
     public async Task<ResponseResult<WorkerDto>> GetAsync(int id, CancellationToken cancellationToken = default)
@@ -44,6 +64,11 @@ internal sealed class WorkerService(IMainRepository repository) : BusinessServic
         if (entity == null)
         {
             return NotFound<WorkerDto>("Worker");
+        }
+
+        if (!HasText(request.FullName))
+        {
+            return BadRequest<WorkerDto>("Worker FIO majburiy.");
         }
 
         entity.FullName = request.FullName.Trim();

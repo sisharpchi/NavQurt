@@ -1,0 +1,74 @@
+@page "{id:int}"
+@model NavQurt.Server.Pages.Recipes.DetailModel
+@{
+    ViewData["Title"] = "Recipe detail";
+}
+
+<div class="nq-page-title">
+    <div>
+        <h1>Recipe detail</h1>
+        <div class="nq-muted">@Model.TargetTitle</div>
+    </div>
+    <div class="nq-actions">
+        <a class="btn btn-light" asp-page="./Index">Orqaga</a>
+        <a class="btn btn-outline-danger" asp-page="./Delete" asp-route-id="@Model.Id">Delete</a>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.Message))
+{
+    <div class="alert alert-info">@Model.Message</div>
+}
+
+<div class="nq-card">
+    <form method="post">
+        <input type="hidden" asp-for="Input.TargetType" />
+        <input type="hidden" asp-for="Input.ProductId" />
+        <input type="hidden" asp-for="Input.IngredientId" />
+
+        <dl class="nq-detail-list mb-3">
+            <dt>Target</dt>
+            <dd>@Model.TargetTitle</dd>
+            <dt>Turi</dt>
+            <dd>@Model.Input.TargetType</dd>
+        </dl>
+
+        <div class="mb-3" style="max-width: 280px;">
+            <label class="form-label" asp-for="Input.PortionYield">Portion yield</label>
+            <input class="form-control" asp-for="Input.PortionYield" type="number" step="0.001" min="0.001" />
+        </div>
+
+        <div class="nq-section-title mb-2">Tarkib</div>
+        <div class="table-responsive">
+            <table class="table nq-table nq-edit-table">
+                <thead>
+                <tr><th>Ingredient</th><th>Miqdor</th></tr>
+                </thead>
+                <tbody>
+                @for (var i = 0; i < Model.Input.Items.Count; i++)
+                {
+                    <tr>
+                        <td>
+                            <select class="form-select" asp-for="Input.Items[i].IngredientId">
+                                <option value="0">Ingredient tanlang</option>
+                                @foreach (var ingredient in Model.Ingredients)
+                                {
+                                    <option value="@ingredient.Id">@ingredient.Title (@ingredient.Unit)</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <input class="form-control" asp-for="Input.Items[i].Quantity" type="number" step="0.001" min="0" />
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="nq-actions mt-3">
+            <button class="btn btn-primary" type="submit">Saqlash</button>
+            <a class="btn btn-light" asp-page="./Index">Bekor qilish</a>
+        </div>
+    </form>
+</div>

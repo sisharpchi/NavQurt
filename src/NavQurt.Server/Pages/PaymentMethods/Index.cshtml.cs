@@ -7,12 +7,24 @@ namespace NavQurt.Server.Pages.PaymentMethods;
 public class IndexModel(IPaymentMethodService service) : PageModel
 {
     public IReadOnlyCollection<PaymentMethodDto> Items { get; private set; } = Array.Empty<PaymentMethodDto>();
+    public int ItemsCount { get; private set; }
+
+    [BindProperty(SupportsGet = true)]
+    public string? Search { get; set; }
+
+    [BindProperty(SupportsGet = true)]
+    public string? Status { get; set; }
 
     [TempData]
     public string? Message { get; set; }
 
     public async Task OnGet(CancellationToken cancellationToken)
     {
-        Items = (await service.GetListAsync(cancellationToken)).Value ?? Array.Empty<PaymentMethodDto>();
+        var result = await service.GetListAsync(new PaymentMethodListRequest(Search, ParseBool(Status)), cancellationToken);
+        Items = result.Value?.Items ?? Array.Empty<PaymentMethodDto>();
+        ItemsCount = result.Value?.ItemsCount ?? Items.Count;
     }
+
+    private static bool? ParseBool(string? value) =>
+        bool.TryParse(value, out var parsed) ? parsed : null;
 }

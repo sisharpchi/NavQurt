@@ -3,15 +3,113 @@
 @{
     ViewData["Title"] = "Yangi prixod";
 }
-<div class="nq-page-title"><div><h1>Yangi prixod</h1></div><a class="btn btn-outline-primary" asp-page="./Index">Orqaga</a></div>
-<form method="post" class="nq-card">
-<div asp-validation-summary="All" class="text-danger"></div>
-<div class="mb-3"><label asp-for="Input.WarehouseId" class="form-label">Sklad</label><select asp-for="Input.WarehouseId" class="form-select" required>@foreach (var warehouse in Model.Warehouses) { <option value="@warehouse.Id">@warehouse.Title</option> }</select></div>
-<div class="mb-3"><label asp-for="Input.Comment" class="form-label">Izoh</label><input asp-for="Input.Comment" class="form-control" /></div>
-<h6>Ingredientlar</h6>
-@for (var i = 0; i < Model.Input.Items.Count; i++)
-{
-<div class="row g-2 mb-2"><div class="col-6"><select asp-for="Input.Items[i].IngredientId" class="form-select"><option value="0">Ingredient</option>@foreach (var ingredient in Model.Ingredients) { <option value="@ingredient.Id">@ingredient.Title (@ingredient.Unit)</option> }</select></div><div class="col-3"><input asp-for="Input.Items[i].Quantity" class="form-control" type="number" step="0.001" placeholder="Miqdor" /></div><div class="col-3"><input asp-for="Input.Items[i].Price" class="form-control" type="number" step="0.01" placeholder="Narx" /></div></div>
-}
-<button class="btn btn-primary mt-2" type="submit">Prixod qilish</button>
+
+<div class="nq-page-title">
+    <div>
+        <h1>Yangi prixod</h1>
+        <div class="nq-muted">Ingredientlarni skladga kirim qilish.</div>
+    </div>
+    <a class="btn btn-outline-primary" asp-page="./Index">Orqaga</a>
+</div>
+
+<form method="post" class="nq-card" id="incomeForm">
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <label asp-for="Input.IncomedAt" class="form-label">Prixod sanasi</label>
+            <input asp-for="Input.IncomedAt" type="datetime-local" asp-format="{0:yyyy-MM-ddTHH:mm}" class="form-control" />
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Input.WarehouseId" class="form-label">Sklad</label>
+            <select asp-for="Input.WarehouseId" class="form-select" required>
+                <option value="">Sklad tanlang</option>
+                @foreach (var warehouse in Model.Warehouses)
+                {
+                    <option value="@warehouse.Id">@warehouse.Title</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Input.Comment" class="form-label">Izoh</label>
+            <input asp-for="Input.Comment" class="form-control" placeholder="Masalan: ta'minotchi yoki invoice raqami" />
+        </div>
+    </div>
+
+    <div class="d-flex align-items-center justify-content-between mt-4 mb-2">
+        <h2 class="nq-section-title mb-0">Ingredientlar</h2>
+        <div class="nq-total-chip">Jami: <strong id="incomeTotal">0</strong></div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table nq-table nq-edit-table">
+            <thead>
+                <tr>
+                    <th>Ingredient</th>
+                    <th class="text-end">Miqdor</th>
+                    <th class="text-end">Narx</th>
+                    <th class="text-end">Summa</th>
+                </tr>
+            </thead>
+            <tbody>
+            @for (var i = 0; i < Model.Input.Items.Count; i++)
+            {
+                <tr>
+                    <td>
+                        <select asp-for="Input.Items[i].IngredientId" class="form-select">
+                            <option value="0">Ingredient tanlang</option>
+                            @foreach (var ingredient in Model.Ingredients)
+                            {
+                                <option value="@ingredient.Id">@ingredient.Title (@ingredient.Unit)</option>
+                            }
+                        </select>
+                    </td>
+                    <td>
+                        <input asp-for="Input.Items[i].Quantity" class="form-control text-end income-quantity" type="number" min="0" step="0.001" placeholder="0.000" />
+                    </td>
+                    <td>
+                        <input asp-for="Input.Items[i].Price" class="form-control text-end income-price" type="number" min="0" step="0.01" placeholder="0" />
+                    </td>
+                    <td class="text-end">
+                        <span class="income-row-total">0</span>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="d-flex justify-content-end gap-2 mt-3">
+        <a class="btn btn-light" asp-page="./Index">Bekor qilish</a>
+        <button class="btn btn-primary" type="submit">Prixod qilish</button>
+    </div>
 </form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const formatter = new Intl.NumberFormat("uz-UZ", { maximumFractionDigits: 2 });
+
+        function readDecimal(element) {
+            const value = Number((element.value || "0").replace(",", "."));
+            return Number.isFinite(value) ? value : 0;
+        }
+
+        function recalcIncomeTotal() {
+            let total = 0;
+            document.querySelectorAll(".nq-edit-table tbody tr").forEach(row => {
+                const quantity = readDecimal(row.querySelector(".income-quantity"));
+                const price = readDecimal(row.querySelector(".income-price"));
+                const rowTotal = quantity * price;
+                total += rowTotal;
+                row.querySelector(".income-row-total").textContent = formatter.format(rowTotal);
+            });
+            document.getElementById("incomeTotal").textContent = formatter.format(total);
+        }
+
+        document.querySelectorAll(".income-quantity, .income-price").forEach(input => {
+            input.addEventListener("input", recalcIncomeTotal);
+        });
+        recalcIncomeTotal();
+    </script>
+}

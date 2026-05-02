@@ -10,5 +10,14 @@ namespace NavQurt.Server.Controllers;
 public class StocksController(IStockService service) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetBalances([FromQuery] int? warehouseId, CancellationToken cancellationToken) => Ok(await service.GetBalancesAsync(warehouseId, cancellationToken));
+    public async Task<IActionResult> GetBalances(
+        [FromQuery] int? warehouseId,
+        [FromQuery] int? categoryId,
+        [FromQuery] string? ingredient,
+        [FromQuery] bool onlyOutOfStock,
+        CancellationToken cancellationToken)
+    {
+        var request = new StockBalanceRequest(warehouseId, categoryId, ingredient, onlyOutOfStock);
+        return Ok(await service.GetBalancesAsync(request, cancellationToken));
+    }
 }

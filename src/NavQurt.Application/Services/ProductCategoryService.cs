@@ -11,13 +11,38 @@ internal sealed class ProductCategoryService(IMainRepository repository) : Busin
 {
     public async Task<ResponseResult<IReadOnlyCollection<ProductCategoryDto>>> GetListAsync(CancellationToken cancellationToken = default)
     {
-        var items = await repository.Query<ProductCategory>(x => !x.IsDeleted)
+        var result = await GetListAsync(new ProductCategoryListRequest(), cancellationToken);
+        return result.Success
+            ? ResponseResult<IReadOnlyCollection<ProductCategoryDto>>.CreateSuccess(result.Value!.Items)
+            : ResponseResult<IReadOnlyCollection<ProductCategoryDto>>.CreateError(result.Error!, result.ErrorCode);
+    }
+
+    public async Task<ResponseResult<ListResponse<ProductCategoryDto>>> GetListAsync(ProductCategoryListRequest request, CancellationToken cancellationToken = default)
+    {
+        var query = repository.Query<ProductCategory>(x => !x.IsDeleted);
+
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var search = request.Search.Trim().ToLower();
+            query = query.Where(x => x.Title.ToLower().Contains(search));
+        }
+
+        if (request.IsActive.HasValue)
+        {
+            query = query.Where(x => x.IsActive == request.IsActive.Value);
+        }
+
+        if (request.ParentCategoryId.HasValue)
+        {
+            query = query.Where(x => x.ParentCategoryId == request.ParentCategoryId.Value);
+        }
+
+        var items = await query
             .OrderBy(x => x.Priority)
             .ThenBy(x => x.Title)
-            .Select(x => x.ToDto())
             .ToListAsync(cancellationToken);
 
-        return ResponseResult<IReadOnlyCollection<ProductCategoryDto>>.CreateSuccess(items);
+        return ResponseResult<ListResponse<ProductCategoryDto>>.CreateSuccess(new ListResponse<ProductCategoryDto>(items.Select(x => x.ToDto()).ToList(), items.Count));
     }
 
     public async Task<ResponseResult<ProductCategoryDto>> GetAsync(int id, CancellationToken cancellationToken = default)
@@ -60,9 +85,19 @@ internal sealed class ProductCategoryService(IMainRepository repository) : Busin
             return NotFound<ProductCategoryDto>("Kategoriya");
         }
 
+        if (!HasText(request.Title))
+        {
+            return BadRequest<ProductCategoryDto>("Kategoriya nomi majburiy.");
+        }
+
         if (request.ParentCategoryId == id)
         {
             return BadRequest<ProductCategoryDto>("Kategoriya o'ziga parent bo'la olmaydi.");
+        }
+
+        if (request.ParentCategoryId.HasValue && !await repository.Query<ProductCategory>().AnyAsync(x => x.Id == request.ParentCategoryId && !x.IsDeleted, cancellationToken))
+        {
+            return NotFound<ProductCategoryDto>("Parent kategoriya");
         }
 
         entity.Title = request.Title.Trim();
@@ -83,6 +118,18 @@ internal sealed class ProductCategoryService(IMainRepository repository) : Busin
         }
 
         entity.IsDeleted = true;
+        var products = await repository.Query<Product>().Where(x => x.ProductCategoryId == id && !x.IsDeleted).ToListAsync(cancellationToken);
+        foreach (var product in products)
+        {
+            product.IsDeleted = true;
+        }
+
+        var children = await repository.Query<ProductCategory>().Where(x => x.ParentCategoryId == id && !x.IsDeleted).ToListAsync(cancellationToken);
+        foreach (var child in children)
+        {
+            child.ParentCategoryId = null;
+        }
+
         await repository.UnitOfWork.CommitAsync(cancellationToken);
         return ResponseResult.CreateSuccess();
     }

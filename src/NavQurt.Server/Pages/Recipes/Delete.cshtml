@@ -1,0 +1,21 @@
+@page "{id:int}"
+@model NavQurt.Server.Pages.Recipes.DeleteModel
+@{
+    ViewData["Title"] = "Recipe delete";
+}
+
+<div class="nq-page-title">
+    <div>
+        <h1>Recipe delete</h1>
+        <div class="nq-muted">@Model.TargetTitle</div>
+    </div>
+    <a class="btn btn-light" asp-page="./Index">Orqaga</a>
+</div>
+
+<div class="nq-card">
+    <p class="mb-3"><strong>@Model.TargetTitle</strong> recipe o'chirilsinmi?</p>
+    <form method="post" class="nq-actions">
+        <button class="btn btn-danger" type="submit">O'chirish</button>
+        <a class="btn btn-light" asp-page="./Detail" asp-route-id="@Model.Recipe?.Id">Bekor qilish</a>
+    </form>
+</div>

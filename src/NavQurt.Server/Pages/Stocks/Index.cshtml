@@ -6,14 +6,14 @@
 
 <div class="nq-page-title">
     <div>
-        <h1>Ostatki</h1>
-        <div class="nq-muted">Ingredient qoldiqlari. Minus qoldiq ham ko‘rinadi.</div>
+        <h1>Qoldiq sklad</h1>
+        <div class="nq-muted">Ingredient qoldiqlari, sklad va kategoriya bo'yicha filter.</div>
     </div>
 </div>
 
 <form method="get" class="nq-card mb-3">
     <div class="row g-2 align-items-end">
-        <div class="col-md-4">
+        <div class="col-xl-3 col-md-6">
             <label asp-for="WarehouseId" class="form-label">Sklad</label>
             <select asp-for="WarehouseId" class="form-select">
                 <option value="">Barchasi</option>
@@ -23,25 +23,82 @@
                 }
             </select>
         </div>
-        <div class="col-auto">
-            <button class="btn btn-primary" type="submit">Ko‘rsatish</button>
+        <div class="col-xl-3 col-md-6">
+            <label asp-for="CategoryId" class="form-label">Kategoriya</label>
+            <select asp-for="CategoryId" class="form-select">
+                <option value="">Barchasi</option>
+                @foreach (var category in Model.Categories)
+                {
+                    <option value="@category.Id">@category.Title</option>
+                }
+            </select>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <label asp-for="IngredientTitle" class="form-label">Ingredient</label>
+            <input asp-for="IngredientTitle" class="form-control" placeholder="Nomi bo'yicha qidirish" />
+        </div>
+        <div class="col-xl-2 col-md-6">
+            <label class="form-label d-block">Holat</label>
+            <div class="form-check nq-check">
+                <input asp-for="OnlyOutOfStock" class="form-check-input" />
+                <label asp-for="OnlyOutOfStock" class="form-check-label">Faqat 0/minus</label>
+            </div>
+        </div>
+        <div class="col-xl-1 col-md-12 d-grid">
+            <button class="btn btn-primary" type="submit">Ko'rsatish</button>
         </div>
     </div>
 </form>
 
 <div class="nq-card">
-    <table class="table nq-table">
-        <thead><tr><th>Sklad</th><th>Ingredient</th><th>Unit</th><th>Qoldiq</th></tr></thead>
-        <tbody>
-        @foreach (var item in Model.Stocks)
-        {
-            <tr>
-                <td>@item.WarehouseTitle</td>
-                <td>@item.IngredientTitle</td>
-                <td>@item.Unit</td>
-                <td class="@(item.Quantity < 0 ? "text-danger fw-bold" : "")">@item.Quantity.ToString("N3")</td>
-            </tr>
-        }
-        </tbody>
-    </table>
+    <div class="d-flex flex-wrap gap-2 mb-3">
+        <div class="nq-summary-pill">
+            <span>Qator</span>
+            <strong>@Model.ItemsCount</strong>
+        </div>
+        <div class="nq-summary-pill">
+            <span>Jami summa</span>
+            <strong>@Model.Total.ToString("N0")</strong>
+        </div>
+        <div class="nq-summary-pill">
+            <span>Minuslarsiz</span>
+            <strong>@Model.TotalWithoutNegativeRemainder.ToString("N0")</strong>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table nq-table">
+            <thead>
+                <tr>
+                    <th>Sklad</th>
+                    <th>Ingredient</th>
+                    <th>Kategoriya</th>
+                    <th>Unit</th>
+                    <th class="text-end">Qoldiq</th>
+                    <th class="text-end">Self price</th>
+                    <th class="text-end">Summa</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.Stocks)
+            {
+                <tr>
+                    <td>@item.WarehouseTitle</td>
+                    <td>
+                        <div class="fw-semibold">@item.IngredientTitle</div>
+                        @if (item.IsBelowMinimum)
+                        {
+                            <span class="badge text-bg-warning">Limitdan past</span>
+                        }
+                    </td>
+                    <td>@(item.CategoryTitle ?? "-")</td>
+                    <td>@item.Unit</td>
+                    <td class="text-end @(item.Quantity < 0 ? "text-danger fw-bold" : "")">@item.Quantity.ToString("N3")</td>
+                    <td class="text-end">@item.AverageSelfPrice.ToString("N0")</td>
+                    <td class="text-end">@item.Total.ToString("N0")</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
 </div>

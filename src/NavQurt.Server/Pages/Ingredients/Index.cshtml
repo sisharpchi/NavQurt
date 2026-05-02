@@ -3,12 +3,99 @@
 @{
     ViewData["Title"] = "Ingredientlar";
 }
-<div class="nq-page-title"><div><h1>Ingredientlar</h1><div class="nq-muted">Sklad va recipe ingredientlari.</div></div><a class="btn btn-primary" asp-page="./Create">Yangi ingredient</a></div>
-@if (!string.IsNullOrWhiteSpace(Model.Message)) { <div class="alert alert-info">@Model.Message</div> }
-<div class="nq-card">
-<table class="table nq-table"><thead><tr><th>Nomi</th><th>Category</th><th>Unit</th><th>Min</th><th>Self price</th><th>Status</th><th></th></tr></thead><tbody>
-@foreach (var item in Model.Ingredients)
+
+<div class="nq-page-title">
+    <div>
+        <h1>Ingredientlar</h1>
+        <div class="nq-muted">@Model.ItemsCount ta ingredient. Sklad, prixod va recipe uchun asosiy xomashyo.</div>
+    </div>
+    <a class="btn btn-primary" asp-page="./Create">Yangi ingredient</a>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.Message))
 {
-<tr><td>@item.Title</td><td>@Model.GetCategoryTitle(item.IngredientCategoryId)</td><td>@item.Unit</td><td>@item.MinRemainderLimit.ToString("N3")</td><td>@item.AverageSelfPrice.ToString("N0")</td><td>@(item.IsActive ? "Active" : "Off")</td><td class="text-end"><a class="btn btn-sm btn-outline-primary" asp-page="./Detail" asp-route-id="@item.Id">Detail</a> <a class="btn btn-sm btn-outline-danger" asp-page="./Delete" asp-route-id="@item.Id">Delete</a></td></tr>
+    <div class="alert alert-info">@Model.Message</div>
 }
-</tbody></table></div>
+
+<form method="get" class="nq-card nq-filter-card mb-3">
+    <div class="nq-filter-grid">
+        <div>
+            <label class="form-label" asp-for="Search">Qidirish</label>
+            <input class="form-control" asp-for="Search" placeholder="Nomi yoki unit" />
+        </div>
+        <div>
+            <label class="form-label" asp-for="CategoryId">Category</label>
+            <select class="form-select" asp-for="CategoryId">
+                <option value="">Hammasi</option>
+                @foreach (var category in Model.Categories)
+                {
+                    <option value="@category.Id">@category.Title</option>
+                }
+            </select>
+        </div>
+        <div>
+            <label class="form-label" asp-for="Status">Status</label>
+            <select class="form-select" asp-for="Status">
+                <option value="">Hammasi</option>
+                <option value="true">Active</option>
+                <option value="false">Off</option>
+            </select>
+        </div>
+        <div class="nq-filter-check">
+            <input class="form-check-input" asp-for="OnlyWithoutRecipe" />
+            <label class="form-check-label" asp-for="OnlyWithoutRecipe">Recipe yo'q</label>
+        </div>
+        <div class="nq-filter-actions">
+            <button class="btn btn-outline-primary" type="submit">Search</button>
+            <a class="btn btn-light" asp-page="./Index">Tozalash</a>
+        </div>
+    </div>
+</form>
+
+<div class="nq-card">
+    <div class="table-responsive">
+        <table class="table nq-table">
+            <thead>
+            <tr>
+                <th>Nomi</th>
+                <th>Category</th>
+                <th>Unit</th>
+                <th>Min qoldiq</th>
+                <th>Self price</th>
+                <th>Recipe</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.Ingredients)
+            {
+                <tr>
+                    <td class="fw-semibold">@item.Title</td>
+                    <td>@Model.GetCategoryTitle(item)</td>
+                    <td>@item.Unit</td>
+                    <td>@item.MinRemainderLimit.ToString("N3")</td>
+                    <td>@item.AverageSelfPrice.ToString("N0")</td>
+                    <td>
+                        @if (item.HasRecipe && item.RecipeId.HasValue)
+                        {
+                            <a asp-page="/Recipes/Detail" asp-route-id="@item.RecipeId">Recipe</a>
+                        }
+                        else
+                        {
+                            <a class="text-danger" asp-page="/Recipes/Create" asp-route-targetType="Ingredient" asp-route-ingredientId="@item.Id">Qo'shish</a>
+                        }
+                    </td>
+                    <td><span class="nq-status @(item.IsActive ? "success" : "muted")">@(item.IsActive ? "Active" : "Off")</span></td>
+                    <td class="text-end">
+                        <div class="nq-table-actions">
+                            <a class="btn btn-sm btn-outline-primary" asp-page="./Detail" asp-route-id="@item.Id">Detail</a>
+                            <a class="btn btn-sm btn-outline-danger" asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
+                        </div>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

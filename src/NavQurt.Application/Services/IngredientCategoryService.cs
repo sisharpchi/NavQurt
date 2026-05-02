@@ -11,12 +11,32 @@ internal sealed class IngredientCategoryService(IMainRepository repository) : Bu
 {
     public async Task<ResponseResult<IReadOnlyCollection<IngredientCategoryDto>>> GetListAsync(CancellationToken cancellationToken = default)
     {
-        var items = await repository.Query<IngredientCategory>(x => !x.IsDeleted)
+        var result = await GetListAsync(new IngredientCategoryListRequest(), cancellationToken);
+        return result.Success
+            ? ResponseResult<IReadOnlyCollection<IngredientCategoryDto>>.CreateSuccess(result.Value!.Items)
+            : ResponseResult<IReadOnlyCollection<IngredientCategoryDto>>.CreateError(result.Error!, result.ErrorCode);
+    }
+
+    public async Task<ResponseResult<ListResponse<IngredientCategoryDto>>> GetListAsync(IngredientCategoryListRequest request, CancellationToken cancellationToken = default)
+    {
+        var query = repository.Query<IngredientCategory>(x => !x.IsDeleted);
+
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var search = request.Search.Trim().ToLower();
+            query = query.Where(x => x.Title.ToLower().Contains(search));
+        }
+
+        if (request.IsActive.HasValue)
+        {
+            query = query.Where(x => x.IsActive == request.IsActive.Value);
+        }
+
+        var items = await query
             .OrderBy(x => x.Title)
-            .Select(x => x.ToDto())
             .ToListAsync(cancellationToken);
 
-        return ResponseResult<IReadOnlyCollection<IngredientCategoryDto>>.CreateSuccess(items);
+        return ResponseResult<ListResponse<IngredientCategoryDto>>.CreateSuccess(new ListResponse<IngredientCategoryDto>(items.Select(x => x.ToDto()).ToList(), items.Count));
     }
 
     public async Task<ResponseResult<IngredientCategoryDto>> GetAsync(int id, CancellationToken cancellationToken = default)
@@ -47,6 +67,11 @@ internal sealed class IngredientCategoryService(IMainRepository repository) : Bu
             return NotFound<IngredientCategoryDto>("Ingredient category");
         }
 
+        if (!HasText(request.Title))
+        {
+            return BadRequest<IngredientCategoryDto>("Ingredient category nomi majburiy.");
+        }
+
         entity.Title = request.Title.Trim();
         entity.IsActive = request.IsActive;
 
@@ -63,6 +88,12 @@ internal sealed class IngredientCategoryService(IMainRepository repository) : Bu
         }
 
         entity.IsDeleted = true;
+        var ingredients = await repository.Query<Ingredient>().Where(x => x.IngredientCategoryId == id && !x.IsDeleted).ToListAsync(cancellationToken);
+        foreach (var ingredient in ingredients)
+        {
+            ingredient.IngredientCategoryId = null;
+        }
+
         await repository.UnitOfWork.CommitAsync(cancellationToken);
         return ResponseResult.CreateSuccess();
     }

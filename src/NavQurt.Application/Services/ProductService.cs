@@ -11,12 +11,47 @@ internal sealed class ProductService(IMainRepository repository) : BusinessServi
 {
     public async Task<ResponseResult<IReadOnlyCollection<ProductDto>>> GetListAsync(CancellationToken cancellationToken = default)
     {
-        var items = await ProductQuery()
-            .Where(x => !x.IsDeleted)
+        var result = await GetListAsync(new ProductListRequest(), cancellationToken);
+        return result.Success
+            ? ResponseResult<IReadOnlyCollection<ProductDto>>.CreateSuccess(result.Value!.Items)
+            : ResponseResult<IReadOnlyCollection<ProductDto>>.CreateError(result.Error!, result.ErrorCode);
+    }
+
+    public async Task<ResponseResult<ListResponse<ProductDto>>> GetListAsync(ProductListRequest request, CancellationToken cancellationToken = default)
+    {
+        var query = ProductQuery().Where(x => !x.IsDeleted);
+
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var search = request.Search.Trim().ToLower();
+            query = query.Where(x => x.Title.ToLower().Contains(search) || (x.Description != null && x.Description.ToLower().Contains(search)));
+        }
+
+        if (request.CategoryId.HasValue)
+        {
+            query = query.Where(x => x.ProductCategoryId == request.CategoryId.Value);
+        }
+
+        if (request.IsActive.HasValue)
+        {
+            query = query.Where(x => x.IsActive == request.IsActive.Value);
+        }
+
+        if (request.IsCombo.HasValue)
+        {
+            query = query.Where(x => x.IsCombo == request.IsCombo.Value);
+        }
+
+        if (request.OnlyWithoutRecipe)
+        {
+            query = query.Where(x => x.Recipe == null || x.Recipe.IsDeleted);
+        }
+
+        var items = await query
             .OrderBy(x => x.Title)
             .ToListAsync(cancellationToken);
 
-        return ResponseResult<IReadOnlyCollection<ProductDto>>.CreateSuccess(items.Select(x => x.ToDto()).ToList());
+        return ResponseResult<ListResponse<ProductDto>>.CreateSuccess(new ListResponse<ProductDto>(items.Select(x => x.ToDto()).ToList(), items.Count));
     }
 
     public async Task<ResponseResult<ProductDto>> GetAsync(int id, CancellationToken cancellationToken = default)
@@ -37,6 +72,7 @@ internal sealed class ProductService(IMainRepository repository) : BusinessServi
 
         var entity = new Product();
         Apply(entity, request);
+        ApplyComboItems(entity, request.ComboItems);
         await repository.AddAsync(entity);
         await repository.UnitOfWork.CommitAsync(cancellationToken);
 
@@ -59,11 +95,7 @@ internal sealed class ProductService(IMainRepository repository) : BusinessServi
         }
 
         Apply(entity, request);
-        entity.ComboItems.Clear();
-        foreach (var item in request.ComboItems ?? Array.Empty<ProductComboItemRequest>())
-        {
-            entity.ComboItems.Add(new ProductComboItem { ProductId = item.ProductId, Quantity = item.Quantity });
-        }
+        ApplyComboItems(entity, request.ComboItems);
 
         await repository.UnitOfWork.CommitAsync(cancellationToken);
         entity = await ProductQuery().FirstAsync(x => x.Id == entity.Id, cancellationToken);
@@ -85,6 +117,8 @@ internal sealed class ProductService(IMainRepository repository) : BusinessServi
 
     private IQueryable<Product> ProductQuery() =>
         repository.Query<Product>()
+            .Include(x => x.ProductCategory)
+            .Include(x => x.Recipe)
             .Include(x => x.ComboItems)
             .ThenInclude(x => x.Product);
 
@@ -131,8 +165,12 @@ internal sealed class ProductService(IMainRepository repository) : BusinessServi
         entity.IsCombo = request.IsCombo;
         entity.UseOwnRecipeForCombo = request.UseOwnRecipeForCombo;
         entity.ProductCategoryId = request.ProductCategoryId;
+    }
 
-        foreach (var item in request.ComboItems ?? Array.Empty<ProductComboItemRequest>())
+    private static void ApplyComboItems(Product entity, IReadOnlyCollection<ProductComboItemRequest>? items)
+    {
+        entity.ComboItems.Clear();
+        foreach (var item in items ?? Array.Empty<ProductComboItemRequest>())
         {
             entity.ComboItems.Add(new ProductComboItem { ProductId = item.ProductId, Quantity = item.Quantity });
         }

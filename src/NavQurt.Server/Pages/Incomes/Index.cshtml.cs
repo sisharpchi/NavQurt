@@ -9,10 +9,21 @@ public class IndexModel(IIncomeService incomeService, IWarehouseService warehous
     public IReadOnlyCollection<IncomeDto> Incomes { get; private set; } = Array.Empty<IncomeDto>();
     public IReadOnlyCollection<WarehouseDto> Warehouses { get; private set; } = Array.Empty<WarehouseDto>();
     [TempData] public string? Message { get; set; }
+    [BindProperty(SupportsGet = true)] public DateTime FromDate { get; set; } = DateTime.Today.AddDays(-7);
+    [BindProperty(SupportsGet = true)] public DateTime ToDate { get; set; } = DateTime.Today;
+    [BindProperty(SupportsGet = true)] public int? WarehouseId { get; set; }
+    [BindProperty(SupportsGet = true)] public string? Search { get; set; }
+    public decimal Total { get; private set; }
+    public int ItemsCount { get; private set; }
+
     public async Task OnGet(CancellationToken cancellationToken)
     {
-        Incomes = (await incomeService.GetListAsync(cancellationToken)).Value ?? Array.Empty<IncomeDto>();
         Warehouses = (await warehouseService.GetListAsync(cancellationToken)).Value ?? Array.Empty<WarehouseDto>();
+        var request = new IncomeListRequest(FromDate, ToDate, WarehouseId, Search);
+        var result = (await incomeService.GetListAsync(request, cancellationToken)).Value;
+
+        Incomes = result?.Items ?? Array.Empty<IncomeDto>();
+        Total = result?.Total ?? 0;
+        ItemsCount = result?.ItemsCount ?? 0;
     }
-    public string GetWarehouseTitle(int id) => Warehouses.FirstOrDefault(x => x.Id == id)?.Title ?? "-";
 }

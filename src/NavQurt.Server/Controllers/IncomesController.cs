@@ -10,7 +10,16 @@ namespace NavQurt.Server.Controllers;
 public class IncomesController(IIncomeService service) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetList(CancellationToken cancellationToken) => Ok(await service.GetListAsync(cancellationToken));
+    public async Task<IActionResult> GetList(
+        [FromQuery] DateTime? fromDate,
+        [FromQuery] DateTime? toDate,
+        [FromQuery] int? warehouseId,
+        [FromQuery] string? search,
+        CancellationToken cancellationToken)
+    {
+        var request = new IncomeListRequest(fromDate, toDate, warehouseId, search);
+        return Ok(await service.GetListAsync(request, cancellationToken));
+    }
 
     [HttpPost]
     public async Task<IActionResult> Create(CreateIncomeRequest request, CancellationToken cancellationToken) => Ok(await service.CreateAsync(request, cancellationToken));
